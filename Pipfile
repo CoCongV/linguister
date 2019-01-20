@@ -17,8 +17,10 @@ click = "*"
 aiohttp = "*"
 uvloop = "*"
 colorama = "*"
+python-vlc = "*"
+pydub = "*"
 playsound = "*"
-gi = "*"
+pygobject = "*"
 
 [requires]
 python_version = "3.5"

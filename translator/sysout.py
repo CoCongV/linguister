@@ -6,15 +6,17 @@ print = partial(print, end='')
 
 def info_out(word, ph, source):
     indent(2)
-    print(word + '  ' + Fore.RED + str([ph]))
+    ph = str([ph] if ph else [])
+    print(word + '  ' + Fore.RED + ph)
     print(Style.DIM + '  ~  ' + source)
     change_line()
 
 def means_out(part, means):
     indent()
     print(Style.DIM + '- ')
-    means_string = '; '.join(means)
-    print(Fore.GREEN + part + '.' + ' ' + means_string)
+    if isinstance(means, (tuple, list)):
+        means = '; '.join(means)
+    print(Fore.GREEN + part  + ' ' + means)
     change_line()
 
 def sentence_out(id_, sentence, trans_sentence):

@@ -6,17 +6,17 @@ print = partial(print, end='')
 
 def info_out(word, ph, source):
     indent(2)
-    ph = str([ph] if ph else [])
+    ph = str(ph if ph else [])
     print(word + '  ' + Fore.RED + ph)
     print(Style.DIM + '  ~  ' + source)
     change_line()
 
-def means_out(part, means):
+def mean_out(part, mean):
     indent()
     print(Style.DIM + '- ')
-    if isinstance(means, (tuple, list)):
-        means = '; '.join(means)
-    print(Fore.GREEN + part  + ' ' + means)
+    if isinstance(mean, (tuple, list)):
+        mean = '; '.join(mean)
+    print(Fore.GREEN + part  + ' ' + mean)
     change_line()
 
 def translate_out(source, translate_msg):
@@ -46,9 +46,11 @@ def change_line():
     print('', end='\n')
 
 def separator(symbol='-', nums=10):
+    change_line()
     indent(2)
     string = ''
     for i in range(nums):
         string += symbol
     print(string)
+    change_line()
     change_line()

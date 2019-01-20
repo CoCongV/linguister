@@ -29,46 +29,75 @@ class YouDaoSDK:
     app_key: Application key
     app_id : Application ID
     """
+
     def __init__(self,
-                 app_id,
-                 app_key,
-                 url="https://openapi.youdao.com/api",
-                 voice_type=0,
-                 ext="mp3",
-                 from_lang="auto",
-                 to_lang="auto",
-                 session=Session()):
-        self.app_key = app_key
-        self.app_id = app_id
-        self.url = url
-        self.voice_type = voice_type
-        self.ext = ext
-        self.from_lang = from_lang
-        self.to_lang = to_lang
+                 session,
+                 suggest_url='http://dict.youdao.com/suggest',
+                 paraphrase_url="http://dict.youdao.com/jsonapi",
+                 translate_url="http://fanyi.youdao.com/translate"):
         self.session = session
+        self.suggest_url = suggest_url
+        self.paraphrase_url = paraphrase_url
+        self.translate_url = translate_url
 
-    def translate(self, text, from_lang=None, to_lang=None, ext=None, voice_type=None):
-        sign, salt = self.generate_sign(text)
-        response = self.session.get(
-            self.url,
+    async def suggest(self, word, lang='eng', num=5, doctype='json'):
+        return await self.session.get(
+            self.suggest_url,
             params={
-                "q": text,
-                "from": from_lang or self.from_lang,
-                "to": to_lang or self.to_lang,
-                "appKey": self.app_id,
-                "salt": salt,
-                "sign": sign,
-                "ext": ext or self.ext,
-                "voice": voice_type or self.voice_type
+                'q': word,
+                'le': lang,
+                'num': num,
+                'doctype': doctype
             })
-        return response
 
-    def generate_sign(self, text):
-        salt = str(uuid4())
-        m = hashlib.md5()
-        m.update(''.join((self.app_id, text, salt, self.app_key)).encode())
-        return m.hexdigest(), salt
+    async def paraphrase(self,
+                         word,
+                         jsonversion=2,
+                         client='mobile',
+                         dict_list=[[
+                             "ec",
+                             "ce",
+                             "simple",
+                             "phrs",
+                         ], "fanyi", "ugc"],
+                         network='wifi'):
+        dicts_len = len(dict_list)
+        dicts_list_cache = []
+        for i in dict_list:
+            if isinstance(i, list):
+                dicts_list_cache.append(i)
+            else:
+                dicts_list_cache.append([i])
 
+        dicts = {"count": dicts_len, "dicts": dicts_list_cache}
+        params = urlencode({
+                'jsonversion': jsonversion,
+                'client': client,
+                'q': word,
+                'dicts': dicts,
+                'network': network
+            })
+        return await self.session.get(
+            self.paraphrase_url + '?' + params)
+
+    @staticmethod
+    def generate_trans_list(dict_):
+        trs = dict_['ec']['word'][0]['trs']
+        result = []
+        for i in trs:
+            result.append(i['tr'][0]['l']['i'][0])
+        return result
+
+    @staticmethod
+    def generate_sentences(dict_):
+        result = []
+        for i in dict_['phrs']['phrs'][:3]:
+            phr = i['phr']
+            headword = phr['headword']['l']['i']
+            tr = phr['trs'][0]['tr']['l']['i']
+            result.append({'headword': headword, 'tr': tr})
+        return result
+        
 
 class QQSDK(BaseTranslateSDK):
 

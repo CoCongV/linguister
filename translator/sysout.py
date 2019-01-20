@@ -19,6 +19,14 @@ def means_out(part, means):
     print(Fore.GREEN + part  + ' ' + means)
     change_line()
 
+def translate_out(source, translate_msg):
+    indent()
+    print(Fore.GREEN + translate_msg)
+    change_line()
+    indent()
+    print(Fore.YELLOW + source)
+    change_line()
+
 def sentence_out(id_, sentence, trans_sentence):
     id_ = str(id_)
     indent()
@@ -36,3 +44,11 @@ def indent(num=2):
 
 def change_line():
     print('', end='\n')
+
+def separator(symbol='-', nums=10):
+    indent(2)
+    string = ''
+    for i in range(nums):
+        string += symbol
+    print(string)
+    change_line()

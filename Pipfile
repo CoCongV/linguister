@@ -9,10 +9,16 @@ flake8 = "*"
 rope = "*"
 pylint = "*"
 yapf = "*"
+translator = {editable = true,path = "."}
 
 [packages]
 requests = "*"
 click = "*"
+aiohttp = "*"
+uvloop = "*"
+colorama = "*"
+playsound = "*"
+gi = "*"
 
 [requires]
 python_version = "3.5"

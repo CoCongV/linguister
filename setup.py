@@ -6,7 +6,7 @@ from setuptools import (
 
 requires = [
     'aiohttp', 'click', 'requests', 'colorama', 'playsound', 'pygobject',
-    'pycairo', 'pygst'
+    'pycairo'
 ]
 
 with open(join(dirname(__file__), 'translator/VERSION.txt'), 'rb') as f:

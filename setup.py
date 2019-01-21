@@ -45,6 +45,6 @@ setup(
         'pytest-runner',
     ],
     tests_require=[
-        'translator', 'pytest', 'pytest_cov', 'nose',
+        'linguister', 'pytest', 'pytest_cov', 'nose',
     ],
 )

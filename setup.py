@@ -1,17 +1,12 @@
 from os.path import dirname, join
-try:
-    # for pip >= 10
-    from pip._internal.req import parse_requirements
-except ImportError:
-    # for pip <= 9.0.3
-    from pip.req import parse_requirements
-
 from setuptools import (
     find_packages,
     setup,
 )
 
-requires = ['aiohttp', 'click', 'requests', 'colorama']
+requires = [
+    'aiohttp', 'click', 'requests', 'colorama', 'playsound', 'pygobject'
+]
 
 with open(join(dirname(__file__), 'translator/VERSION.txt'), 'rb') as f:
     version = f.read().decode('ascii').strip()
@@ -41,5 +36,13 @@ setup(
         'Operating System :: Unix',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+    ],
+    test_suite='nose.collector',
+    setup_requires=[
+        'pytest-runner',
+    ],
+    tests_require=[
+        'translator', 'pytest', 'pytest_cov', 'nose',
     ],
 )

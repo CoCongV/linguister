@@ -10,15 +10,16 @@ rope = "*"
 pylint = "*"
 yapf = "*"
 translator = {editable = true,path = "."}
+requests = "*"
+pytest = "*"
+pytest-cov = "*"
+nose = "*"
 
 [packages]
-requests = "*"
 click = "*"
 aiohttp = "*"
 uvloop = "*"
 colorama = "*"
-python-vlc = "*"
-pydub = "*"
 playsound = "*"
 pygobject = "*"
 

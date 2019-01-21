@@ -9,8 +9,7 @@ import time
 from urllib.parse import urlencode
 from uuid import uuid4
 
-import requests
-from requests import Session
+from translator.exceptions import catch_req
 
 
 class BaseTranslateSDK:
@@ -101,57 +100,6 @@ class YouDaoSDK:
         return result
 
 
-class QQSDK(BaseTranslateSDK):
-
-    def __init__(self,
-                 app_id: int,
-                 app_key: str,
-                 trans_url="https://api.ai.qq.com/fcgi-bin/nlp/nlp_texttranslate",
-                 wordsync_url = 'https://api.ai.qq.com/fcgi-bin/nlp/nlp_wordsyn',
-                 session=Session()):
-        self.app_id = app_id
-        self.app_key = app_key
-        self.default_source = 'en'
-        self.default_target = 'zh'
-        self.session = session
-        self.trans_url = trans_url
-
-    def translate(self, text, app_id=None, app_key=None, source=None, target=None):
-        time_stamp = self.generate_timestamp()
-        nonce_str = self.generate_random_str()
-        params = {
-                'app_id': app_id or self.app_id,
-                'time_stamp': time_stamp,
-                'nonce_str': nonce_str,
-                'text': text,
-            }
-        sign = self.generate_sign(dict(params), app_key
-                                  or self.app_key).upper()
-        params['sign'] = sign
-
-        trans_params = dict(params)
-        trans_params.update({
-            'source': source or self.default_source,
-            'target': target or self.default_target
-        })
-        trans_res = self.translate(trans_params)
-        return trans_res
-
-    def generate_sign(self, params: dict, app_key=None):
-        params = OrderedDict(sorted(params.items()))
-        m = hashlib.md5()
-        value = urlencode(params) + "&app_key=" + app_key
-        m.update(value.encode())
-        return m.hexdigest()
-
-
-    def _translate(self, params):
-        response = self.session.get(
-            self.trans_url,
-            params=params)
-        return response
-
-
 class IcibaSDK(BaseTranslateSDK):
 
     def __init__(
@@ -164,17 +112,6 @@ class IcibaSDK(BaseTranslateSDK):
         self.trans_url = trans_url
         self.interface_url = interface_url
         self.paraphrase_url = paraphrase_url
-
-    @staticmethod
-    def catch_req():
-        def decorator(func):
-            @wraps(func)
-            async def wrapper(*args, **kwargs):
-                response = await func(*args, **kwargs)
-                if response.status_code == 200:
-                    return response.json(), True
-                else:
-                    return response.status_code, False
 
     async def interface(self,
                         word,
@@ -205,6 +142,7 @@ class IcibaSDK(BaseTranslateSDK):
             })
         return response
 
+    @catch_req('json')
     async def paraphrase(self, word, a="getWordMean", c="search", dict_list=[8]):
         params = [('a', a), ('word', word), ('c', c)]
         for i in dict_list:

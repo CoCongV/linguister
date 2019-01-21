@@ -34,7 +34,7 @@ async def iciba(words, session):
     iciba_sdk = IcibaSDK(session)
     try:
         response = await iciba_sdk.paraphrase(words)
-    except TranslatorException as e:
+    except (TranslatorException, ClientError) as e:
         return {'source': 'iciba', 'exc': e}
     result = await response.json()
     sentences = IcibaSDK.get_sentences(result)

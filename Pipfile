@@ -9,7 +9,6 @@ flake8 = "*"
 rope = "*"
 pylint = "*"
 yapf = "*"
-translator = {editable = true,path = "."}
 requests = "*"
 pytest = "*"
 pytest-cov = "*"

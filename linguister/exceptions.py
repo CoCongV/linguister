@@ -22,10 +22,10 @@ def catch_req(content_type='json'):
     return decorator
 
 
-class TranslatorException(Exception):
+class LinguisterException(Exception):
     pass
 
 
-class RequestException(TranslatorException):
+class RequestException(LinguisterException):
     def __init__(self, message="Request Error"):
         super().__init__(message)

@@ -11,7 +11,7 @@ except ImportError:
 import click
 import colorama
 
-from linguister.exceptions import TranslatorException
+from linguister.exceptions import LinguisterException
 from linguister.sdk import IcibaSDK, YouDaoSDK
 from linguister.info import change_line, out
 from linguister.audio import play
@@ -34,7 +34,7 @@ async def iciba(words, session):
     iciba_sdk = IcibaSDK(session)
     try:
         response = await iciba_sdk.paraphrase(words)
-    except (TranslatorException, ClientError) as e:
+    except (LinguisterException, ClientError) as e:
         return {'source': 'iciba', 'exc': e}
     result = await response.json()
     sentences = IcibaSDK.get_sentences(result)
@@ -70,7 +70,7 @@ async def youdao(words, session):
 
     try:
         response = await youdao_sdk.paraphrase(words)
-    except (TranslatorException, ClientError) as e:
+    except (LinguisterException, ClientError) as e:
         return {'source': 'youdao', 'exc': e}
 
     result = await response.json()

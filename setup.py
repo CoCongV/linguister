@@ -38,4 +38,11 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
+    test_suite='nose.collector',
+    setup_requires=[
+        'pytest-runner',
+    ],
+    tests_require=[
+        'translator', 'pytest', 'pytest_cov', 'nose',
+    ],
 )

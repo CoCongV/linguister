@@ -11,6 +11,9 @@ pylint = "*"
 yapf = "*"
 translator = {editable = true,path = "."}
 requests = "*"
+pytest = "*"
+pytest-cov = "*"
+nose = "*"
 
 [packages]
 click = "*"

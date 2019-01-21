@@ -9,10 +9,11 @@ import time
 from urllib.parse import urlencode
 from uuid import uuid4
 
-from linguister.exceptions import catch_req
+from linguister.exceptions import catch_req, SymbolException
 
 
 class BaseTranslateSDK:
+    symbols = {}
 
     def generate_random_str(self, length=24) -> str:
         return ''.join(
@@ -22,6 +23,14 @@ class BaseTranslateSDK:
     def generate_timestamp(self) -> int:
         return int(time.time())
 
+    def get_lang_symbol(self, symbol):
+        v = self.symbols.get(symbol)
+        if not v:
+            raise SymbolException(
+                "{}: Don't supported this language or symbol error.".format(
+                    symbol))
+        else:
+            return v
 
 class YouDaoSDK:
     """

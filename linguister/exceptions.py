@@ -29,3 +29,9 @@ class LinguisterException(Exception):
 class RequestException(LinguisterException):
     def __init__(self, message="Request Error"):
         super().__init__(message)
+
+
+class SymbolException(LinguisterException):
+    def __init__(self,
+                 message="Don't supported this language or symbol error"):
+        super().__init__(message)

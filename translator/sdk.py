@@ -9,9 +9,6 @@ import time
 from urllib.parse import urlencode
 from uuid import uuid4
 
-import requests
-from requests import Session
-
 
 class BaseTranslateSDK:
 
@@ -99,57 +96,6 @@ class YouDaoSDK:
                 tr = phr['trs'][0]['tr']['l']['i']
                 result.append({'example': headword, 'translate': tr})
         return result
-
-
-class QQSDK(BaseTranslateSDK):
-
-    def __init__(self,
-                 app_id: int,
-                 app_key: str,
-                 trans_url="https://api.ai.qq.com/fcgi-bin/nlp/nlp_texttranslate",
-                 wordsync_url = 'https://api.ai.qq.com/fcgi-bin/nlp/nlp_wordsyn',
-                 session=Session()):
-        self.app_id = app_id
-        self.app_key = app_key
-        self.default_source = 'en'
-        self.default_target = 'zh'
-        self.session = session
-        self.trans_url = trans_url
-
-    def translate(self, text, app_id=None, app_key=None, source=None, target=None):
-        time_stamp = self.generate_timestamp()
-        nonce_str = self.generate_random_str()
-        params = {
-                'app_id': app_id or self.app_id,
-                'time_stamp': time_stamp,
-                'nonce_str': nonce_str,
-                'text': text,
-            }
-        sign = self.generate_sign(dict(params), app_key
-                                  or self.app_key).upper()
-        params['sign'] = sign
-
-        trans_params = dict(params)
-        trans_params.update({
-            'source': source or self.default_source,
-            'target': target or self.default_target
-        })
-        trans_res = self.translate(trans_params)
-        return trans_res
-
-    def generate_sign(self, params: dict, app_key=None):
-        params = OrderedDict(sorted(params.items()))
-        m = hashlib.md5()
-        value = urlencode(params) + "&app_key=" + app_key
-        m.update(value.encode())
-        return m.hexdigest()
-
-
-    def _translate(self, params):
-        response = self.session.get(
-            self.trans_url,
-            params=params)
-        return response
 
 
 class IcibaSDK(BaseTranslateSDK):

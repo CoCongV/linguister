@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "cef5eae15bb334638dbce8c9182dfdfc02d7c2b3b69414860648dadcab999973"
+            "sha256": "c41e0e9a88b7d489ceb0b2dd1af14f7aa314bceebb43128cf41ee3ed293053af"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -57,13 +57,6 @@
                 "sha256:ca4be454458f9dec299268d472aaa5a11f67a4ff70093396e1ceae9c76cf4bbb"
             ],
             "version": "==18.2.0"
-        },
-        "certifi": {
-            "hashes": [
-                "sha256:47f9c83ef4c0c621eaef743f133f09fa8a74a9b75f037e8624f83bd1b6626cb7",
-                "sha256:993f830721089fef441cdfeb4b2c8c9df86f0c63239f06bd025a76a7daddb033"
-            ],
-            "version": "==2018.11.29"
         },
         "chardet": {
             "hashes": [
@@ -149,35 +142,12 @@
             ],
             "version": "==1.18.0"
         },
-        "pydub": {
-            "hashes": [
-                "sha256:07d5eec305110cf1dfe1a0c45eed84bc31f889b1b19feab3859a05dc45b70e7b",
-                "sha256:c703e220917be686fc83d24231849a11c95ba540963ffb3ae5bb322788974d79"
-            ],
-            "index": "pypi",
-            "version": "==0.23.0"
-        },
         "pygobject": {
             "hashes": [
                 "sha256:2d4423cbf169d50a3165f2dde21478a00215c7fb3f68d9d236af588c670980bb"
             ],
             "index": "pypi",
             "version": "==3.30.4"
-        },
-        "python-vlc": {
-            "hashes": [
-                "sha256:b6cb026dcd65a367b95a37d37eb461e7ae9be261617884679e3e7cadae891068"
-            ],
-            "index": "pypi",
-            "version": "==3.0.4106"
-        },
-        "requests": {
-            "hashes": [
-                "sha256:502a824f31acdacb3a35b6690b5fbf0bc41d63a24a45c4004352b0242707598e",
-                "sha256:7bf2a778576d825600030a110f3c0e3e8edc51dfaafe1c146e39a2027784957b"
-            ],
-            "index": "pypi",
-            "version": "==2.21.0"
         },
         "typing-extensions": {
             "hashes": [
@@ -187,13 +157,6 @@
             ],
             "markers": "python_version < '3.7'",
             "version": "==3.7.2"
-        },
-        "urllib3": {
-            "hashes": [
-                "sha256:61bf29cada3fc2fbefad4fdf059ea4bd1b4a86d2b6d15e1c7c0b582b9752fe39",
-                "sha256:de9529817c93f27c8ccbfead6985011db27bd0ddfcdb2d86f3f663385c6a9c22"
-            ],
-            "version": "==1.24.1"
         },
         "uvloop": {
             "hashes": [
@@ -471,6 +434,13 @@
             ],
             "version": "==0.7.5"
         },
+        "playsound": {
+            "hashes": [
+                "sha256:1e83750a5325cbccee03d6e751ba3e78c037ac95b95a3ba1f38d0c5aca9e1a34"
+            ],
+            "index": "pypi",
+            "version": "==1.2.2"
+        },
         "prompt-toolkit": {
             "hashes": [
                 "sha256:c1d6aff5252ab2ef391c2fe498ed8c088066f66bc64a8d5c095bbf795d9fec34",
@@ -485,6 +455,12 @@
                 "sha256:d7cc528d76e76342423ca640335bd3633420dc1366f258cb31d05e865ef5ca1f"
             ],
             "version": "==0.6.0"
+        },
+        "pycairo": {
+            "hashes": [
+                "sha256:abd42a4c9c2069febb4c38fe74bfc4b4a9d3a89fea3bc2e4ba7baff7a20f783f"
+            ],
+            "version": "==1.18.0"
         },
         "pycodestyle": {
             "hashes": [
@@ -506,6 +482,13 @@
                 "sha256:e8218dd399a61674745138520d0d4cf2621d7e032439341bc3f647bff125818d"
             ],
             "version": "==2.3.1"
+        },
+        "pygobject": {
+            "hashes": [
+                "sha256:2d4423cbf169d50a3165f2dde21478a00215c7fb3f68d9d236af588c670980bb"
+            ],
+            "index": "pypi",
+            "version": "==3.30.4"
         },
         "pylint": {
             "hashes": [

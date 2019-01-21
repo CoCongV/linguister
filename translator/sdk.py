@@ -111,17 +111,6 @@ class IcibaSDK(BaseTranslateSDK):
         self.interface_url = interface_url
         self.paraphrase_url = paraphrase_url
 
-    @staticmethod
-    def catch_req():
-        def decorator(func):
-            @wraps(func)
-            async def wrapper(*args, **kwargs):
-                response = await func(*args, **kwargs)
-                if response.status_code == 200:
-                    return response.json(), True
-                else:
-                    return response.status_code, False
-
     async def interface(self,
                         word,
                         c="word",

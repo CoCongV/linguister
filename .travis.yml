@@ -12,8 +12,8 @@ python:
   - 3.5
 before_install: 
   - sudo apt-get update
-  - sudo apt-get install -y libgirepository1.0-dev libcairo2-dev
-  - pip install cairo
+  - sudo apt-get install -y libgirepository1.0-dev libcairo2-dev libcairo2
+  - pip install pycairo
 install: pip install .
 script: python setup.py test
 after_script:

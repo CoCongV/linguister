@@ -2,10 +2,16 @@ from functools import partial
 
 from colorama import init, Fore, Back, Style
 
+from translator.errout import err
+
 print = partial(print, end='')
 
 def out(data):
-    print(data)
+    if data.get('exc'):
+        indent(2)
+        err(str(data['exc']) + ' ~ ' + data['source'])
+        separator()
+        return
     info_out(data['words'], data['ph'], data['source'])
     for mean in data.get('means', []):
         mean_out(mean)

@@ -10,8 +10,9 @@ except ImportError:
 import click
 import colorama
 
+from translator.exceptions import TranslatorException
 from translator.sdk import IcibaSDK, YouDaoSDK
-from translator.sysout import change_line, out
+from translator.info import change_line, out
 from translator.audio import play
 
 colorama.init(autoreset=True)
@@ -30,7 +31,10 @@ def generate_ph(en=None, us=None):
 
 async def iciba(words, session):
     iciba_sdk = IcibaSDK(session)
-    response = await iciba_sdk.paraphrase(words)
+    try:
+        response = await iciba_sdk.paraphrase(words)
+    except TranslatorException as e:
+        return {'source': 'iciba', 'exc': e}
     result = await response.json()
     sentences = IcibaSDK.get_sentences(result)
     base_info = result['baesInfo']

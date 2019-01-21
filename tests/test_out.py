@@ -1,4 +1,4 @@
-from translator.sysout import out
+from translator.info import out
 
 
 word_data = {

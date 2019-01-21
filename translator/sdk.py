@@ -9,6 +9,8 @@ import time
 from urllib.parse import urlencode
 from uuid import uuid4
 
+from translator.exceptions import catch_req
+
 
 class BaseTranslateSDK:
 
@@ -140,6 +142,7 @@ class IcibaSDK(BaseTranslateSDK):
             })
         return response
 
+    @catch_req('json')
     async def paraphrase(self, word, a="getWordMean", c="search", dict_list=[8]):
         params = [('a', a), ('word', word), ('c', c)]
         for i in dict_list:

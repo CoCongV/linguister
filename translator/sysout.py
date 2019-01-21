@@ -5,8 +5,9 @@ from colorama import init, Fore, Back, Style
 print = partial(print, end='')
 
 def out(data):
+    print(data)
     info_out(data['words'], data['ph'], data['source'])
-    for mean in data.get('means'):
+    for mean in data.get('means', []):
         mean_out(mean)
     if data.get('translate_msg') and data.get('translate_result'):
         translate_out(data['translate_msg'], data['translate_result'])

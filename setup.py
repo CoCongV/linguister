@@ -13,7 +13,7 @@ with open(join(dirname(__file__), 'translator/VERSION.txt'), 'rb') as f:
     version = f.read().decode('ascii').strip()
 
 setup(
-    name='translator',
+    name='linguister',
     version=version,
     description='',
     packages=find_packages(exclude=[]),

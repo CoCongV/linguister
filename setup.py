@@ -15,7 +15,7 @@ with open(join(dirname(__file__), 'linguister/VERSION.txt'), 'rb') as f:
 setup(
     name='linguister',
     version=version,
-    description='',
+    description='Terminal translation tool',
     packages=find_packages(exclude=[]),
     author='CoCong',
     author_email='cong.lv.yx@gmail.com',

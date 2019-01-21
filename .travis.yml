@@ -13,7 +13,7 @@ python:
 before_install: 
   - sudo apt-get update
   - sudo apt-get install -y libgirepository1.0-dev libcairo2-dev libcairo2
-  - pip install pycairo
+  - sudo apt-get install python-gst0.10 gstreamer0.10-plugins-good gstreamer0.10-plugins-ugly
 install: pip install .
 script: python setup.py test
 after_script:

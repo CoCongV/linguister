@@ -4,6 +4,16 @@ from colorama import init, Fore, Back, Style
 
 print = partial(print, end='')
 
+def out(data):
+    info_out(data['words'], data['ph'], data['source'])
+    for mean in data.get('means'):
+        mean_out(mean)
+    if data.get('translate_msg') and data.get('translate_result'):
+        translate_out(data['translate_msg'], data['translate_result'])
+    for n, s in enumerate(data['sentences'], start=1):
+        sentence_out(n, s['example'], s['translate'])
+    separator()
+
 def info_out(word, ph, source):
     indent(2)
     ph = str(ph if ph else [])
@@ -11,12 +21,10 @@ def info_out(word, ph, source):
     print(Style.DIM + '  ~  ' + source)
     change_line()
 
-def mean_out(part, mean):
+def mean_out(mean):
     indent()
     print(Style.DIM + '- ')
-    if isinstance(mean, (tuple, list)):
-        mean = '; '.join(mean)
-    print(Fore.GREEN + part  + ' ' + mean)
+    print(Fore.GREEN + mean)
     change_line()
 
 def translate_out(source, translate_msg):

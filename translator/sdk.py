@@ -81,23 +81,25 @@ class YouDaoSDK:
             self.paraphrase_url + '?' + params)
 
     @staticmethod
-    def generate_trans_list(dict_):
-        trs = dict_['ec']['word'][0]['trs']
+    def get_mean_list(dict_):
         result = []
-        for i in trs:
-            result.append(i['tr'][0]['l']['i'][0])
+        if dict_.get('ec'):
+            trs = dict_['ec']['word'][0]['trs']
+            for i in trs:
+                result.append(i['tr'][0]['l']['i'][0])
         return result
 
     @staticmethod
-    def generate_sentences(dict_):
+    def get_sentences(dict_):
         result = []
-        for i in dict_['phrs']['phrs'][:3]:
-            phr = i['phr']
-            headword = phr['headword']['l']['i']
-            tr = phr['trs'][0]['tr']['l']['i']
-            result.append({'headword': headword, 'tr': tr})
+        if dict_.get('phrs'):
+            for i in dict_['phrs']['phrs'][:3]:
+                phr = i['phr']
+                headword = phr['headword']['l']['i']
+                tr = phr['trs'][0]['tr']['l']['i']
+                result.append({'example': headword, 'translate': tr})
         return result
-        
+
 
 class QQSDK(BaseTranslateSDK):
 
@@ -208,3 +210,23 @@ class IcibaSDK(BaseTranslateSDK):
         for i in dict_list:
             params.append(('list', i))
         return await self.session.get(self.paraphrase_url, params=params)
+
+    @staticmethod
+    def get_means(d) -> list:
+        parts = d[0]['parts']
+        result = []
+        for p in parts:
+            means = '; '.join(p['means'])
+            result.append(p['part'] + ' ' + means)
+        return result
+
+    @staticmethod
+    def get_sentences(d):
+        sentences = d.get('sentence', [])
+        result = []
+        for s in sentences:
+            result.append({
+                'example': s['Network_en'],
+                'translate': s['Network_cn']
+            })
+        return result

@@ -49,6 +49,7 @@ class YouDaoSDK:
                 'doctype': doctype
             })
 
+    @catch_req()
     async def paraphrase(self,
                          word,
                          jsonversion=2,

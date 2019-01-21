@@ -1,5 +1,7 @@
 from functools import wraps
 
+from aiohttp.client_exceptions import ClientConnectionError
+
 def catch_req(content_type='json'):
     def decorator(func):
         @wraps(func)

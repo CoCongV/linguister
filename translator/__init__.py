@@ -2,6 +2,7 @@ import asyncio
 from multiprocessing import Process
 
 import aiohttp
+from aiohttp.client_exceptions import ClientError
 try:
     import uvloop
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
@@ -66,7 +67,12 @@ async def iciba(words, session):
 
 async def youdao(words, session):
     youdao_sdk = YouDaoSDK(session)
-    response = await youdao_sdk.paraphrase(words)
+
+    try:
+        response = await youdao_sdk.paraphrase(words)
+    except (TranslatorException, ClientError) as e:
+        return {'source': 'youdao', 'exc': e}
+
     result = await response.json()
     ec_dict = result.get('ec')
     if ec_dict:

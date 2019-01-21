@@ -1,4 +1,4 @@
-sudo: false  # https://docs.travis-ci.com/user/ci-environment/
+dist: xenial
 env:
   global:
     - CC_TEST_REPORTER_ID=ade71cd653792da684ee23c3f23101c2084957fad16260fbf681c37e398deb29
@@ -10,6 +10,9 @@ language: python
 python:
   - 3.6
   - 3.5
+before_install: 
+  - sudo apt-get update
+  - sudo apt-get install -y libgirepository1.0-dev libcairo2-dev 
 install: pip install .
 script: python setup.py test
 after_script:

@@ -9,7 +9,7 @@ import time
 from urllib.parse import urlencode
 from uuid import uuid4
 
-from translator.exceptions import catch_req
+from linguister.exceptions import catch_req
 
 
 class BaseTranslateSDK:

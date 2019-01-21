@@ -1,4 +1,4 @@
-from translator.info import out
+from linguister.info import out
 
 
 word_data = {

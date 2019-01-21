@@ -2,8 +2,8 @@ import asyncio
 
 import aiohttp
 
-from translator import loop, generate_ph
-from translator.sdk import YouDaoSDK, IcibaSDK
+from linguister import loop, generate_ph
+from linguister.sdk import YouDaoSDK, IcibaSDK
 
 
 class TestSDK:

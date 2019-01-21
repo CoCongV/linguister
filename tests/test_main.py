@@ -1,6 +1,6 @@
 import asyncio
 
-from translator import loop, run
+from linguister import loop, run
 
 
 class TestMain:

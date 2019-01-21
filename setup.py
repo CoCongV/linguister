@@ -9,7 +9,7 @@ requires = [
     'pycairo'
 ]
 
-with open(join(dirname(__file__), 'translator/VERSION.txt'), 'rb') as f:
+with open(join(dirname(__file__), 'linguister/VERSION.txt'), 'rb') as f:
     version = f.read().decode('ascii').strip()
 
 setup(
@@ -27,9 +27,10 @@ setup(
     zip_safe=False,
     entry_points={
         "console_scripts": [
-            'translator = translator:cli',
-            'trans = translator:cli',
-            'fy = translator:cli'
+            'translator = linguister:cli',
+            'trans = linguister:cli',
+            'fy = linguister:cli',
+            'linguister = linguister:cli'
         ]
     },
     classifiers=[

@@ -11,10 +11,10 @@ except ImportError:
 import click
 import colorama
 
-from translator.exceptions import TranslatorException
-from translator.sdk import IcibaSDK, YouDaoSDK
-from translator.info import change_line, out
-from translator.audio import play
+from linguister.exceptions import TranslatorException
+from linguister.sdk import IcibaSDK, YouDaoSDK
+from linguister.info import change_line, out
+from linguister.audio import play
 
 colorama.init(autoreset=True)
 loop = asyncio.get_event_loop()

@@ -2,7 +2,7 @@ from functools import partial
 
 from colorama import init, Fore, Back, Style
 
-from translator.errout import err
+from linguister.errout import err
 
 print = partial(print, end='')
 

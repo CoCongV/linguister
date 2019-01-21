@@ -1,3 +1,4 @@
+dist: xenial
 env:
   global:
     - CC_TEST_REPORTER_ID=ade71cd653792da684ee23c3f23101c2084957fad16260fbf681c37e398deb29

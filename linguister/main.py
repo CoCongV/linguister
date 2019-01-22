@@ -1,6 +1,6 @@
 from aiohttp.client_exceptions import ClientError
 
-from linguister.exceptions import LinguisterException
+from linguister.exceptions import LinguisterException, RequestException
 from linguister.sdk import IcibaSDK, YouDaoSDK, BingSDK
 from linguister.utils import generate_ph
 
@@ -9,9 +9,13 @@ async def iciba(words, session):
     iciba_sdk = IcibaSDK(session)
     try:
         response = await iciba_sdk.paraphrase(words)
+        result = await response.json()
+        if result.get('errno'):
+            raise RequestException(
+                "Request Error: errmsg: {}, errcode: {}".format(
+                    result.get('errmsg'), result.get('errno')))
     except (LinguisterException, ClientError) as e:
         return {"source": "iciba", "exc": e}
-    result = await response.json()
     sentences = IcibaSDK.get_sentences(result)
     base_info = result["baesInfo"]
 
@@ -67,3 +71,14 @@ async def youdao(words, session):
         "audio": None,
         "words": words
     }
+
+async def bing(words, session):
+    bing_sdk = BingSDK(session)
+
+    try:
+        response = await bing_sdk.paraphrase(words)
+    except (LinguisterException, ClientError) as e:
+        return {"source": "bing", "exc": e}
+
+    # result = await response.json()
+    print(await response.text())

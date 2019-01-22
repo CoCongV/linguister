@@ -44,8 +44,9 @@ async def run(words, say, origin, dest):
 
     audio = None
     for res in responses:
-        out(res)
-        if say:
+        if res:
+            out(res)
+        if say and res:
             if not audio:
                 if res.get("audio"):
                     audio = res["audio"]

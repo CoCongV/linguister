@@ -156,7 +156,7 @@ class IcibaSDK(BaseTranslateSDK):
             })
         return response
 
-    @catch_req('json')
+    @catch_req()
     async def paraphrase(self, word, a="getWordMean", c="search", dict_list=[8]):
         params = [('a', a), ('word', word), ('c', c)]
         for i in dict_list:

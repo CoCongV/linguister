@@ -303,11 +303,11 @@ class Translator(object):
                  proxies=None):
 
         self.session = session
-        if proxies is not None:
-            self.session.proxies = proxies
-        self.session.headers.update({
-            'User-Agent': user_agent,
-        })
+        # if proxies is not None:
+        #     self.session.proxies = proxies
+        # self.session.headers.update({
+        #     'User-Agent': user_agent,
+        # })
 
         self.service_urls = service_urls or ['translate.google.com']
         self.token_acquirer = TokenAcquirer(

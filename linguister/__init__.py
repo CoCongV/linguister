@@ -16,6 +16,7 @@ from linguister.config import Config
 from linguister.errout import err
 from linguister.exceptions import ConfigException
 from linguister.info import change_line, out
+from linguister.const import DEFAULT_USER_AGENT
 
 colorama.init(autoreset=True)
 loop = asyncio.get_event_loop()
@@ -24,7 +25,7 @@ conf.load_toml()
 
 async def run(words, say, origin, dest):
     tasks = []
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(headers=DEFAULT_USER_AGENT) as session:
         for sdk in conf.SDKS:
             try:
                 async_func = getattr(main, sdk)

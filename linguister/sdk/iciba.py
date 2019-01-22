@@ -2,6 +2,13 @@ from linguister.exceptions import catch_req
 from linguister.sdk import BaseTranslateSDK
 
 
+LANGUAGES = {
+    'ja': 'japanese',
+    'en': 'english',
+}
+LANGCODES = dict(map(reversed, LANGUAGES.items()))
+
+
 class IcibaSDK(BaseTranslateSDK):
     jp = 'ja'
 

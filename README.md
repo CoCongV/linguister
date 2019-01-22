@@ -5,3 +5,5 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/b0bee8de11cb57a8173d/test_coverage)](https://codeclimate.com/github/CoCongV/translator/test_coverage)
 
 Terminal translate tool for linux
+---
+Support: Chinese, English

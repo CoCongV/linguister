@@ -27,11 +27,11 @@ class BaseTranslateSDK:
 
     def generate_timestamp(self) -> int:
         return int(time.time())
-    
+
     def trans_symbol(self, origin, dest):
         if not (hasattr(self, origin) and hasattr(self, dest)):
             raise NotSupportLangException()
-        
+
         return getattr(self, origin), getattr(self, dest)
 
 class YouDaoSDK:
@@ -156,7 +156,7 @@ class IcibaSDK(BaseTranslateSDK):
             })
         return response
 
-    @catch_req('json')
+    @catch_req()
     async def paraphrase(self, word, a="getWordMean", c="search", dict_list=[8]):
         params = [('a', a), ('word', word), ('c', c)]
         for i in dict_list:
@@ -182,3 +182,32 @@ class IcibaSDK(BaseTranslateSDK):
                 'translate': s['Network_cn']
             })
         return result
+
+
+class BingSDK(BaseTranslateSDK):
+    def __init__(
+            self,
+            session,
+            dict_url="https://dict.bing.com.cn/api/http/v2/4154AA7A1FC54ad7A84A0236AA4DCAF3/en-us/zh-cn/",
+            trans_url="https://dict.bing.com.cn/api/http/v2/4154AA7A1FC54ad7A84A0236AA4DCAF3/en-us/zh-cn/",
+    ):
+        self.session = session
+        self.dict_url = dict_url
+        self.trans_url = trans_url
+
+    @catch_req()
+    async def paraphrase(self, words):
+        return await self.session.get(
+            self.dict_url, params={
+                'q': words,
+                'format': 'application/json'
+            })
+
+    @catch_req()
+    async def translate(self, words: str):
+        return await self.session.get(
+            self.trans_url, params={
+                'q': words.replace(' ', '+'),
+                'format': 'application/json'
+            }
+        )

@@ -27,10 +27,11 @@ setup(
     zip_safe=False,
     entry_points={
         "console_scripts": [
-            'translator = linguister:cli',
-            'trans = linguister:cli',
-            'fy = linguister:cli',
-            'linguister = linguister:cli'
+            'translator = linguister:translate',
+            'trans = linguister:translate',
+            'fy = linguister:translate',
+            'linguister = linguister:translate',
+            'linguister-cli = linguister:cli'
         ]
     },
     classifiers=[

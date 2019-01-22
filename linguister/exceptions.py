@@ -2,7 +2,7 @@ from functools import wraps
 
 from aiohttp.client_exceptions import ClientConnectionError
 
-def catch_req(content_type='json'):
+def catch_req():
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -10,12 +10,6 @@ def catch_req(content_type='json'):
             if response.status != 200:
                 raise RequestException("Request Error: {}".format(response.status))
             else:
-                if content_type == 'json':
-                    result = await response.json()
-                    if result.get('errno'):
-                        raise RequestException(
-                            "Request Error: errmsg: {}, errcode: {}".format(
-                                result.get('errmsg'), result.get('errno')))
                 return response
 
         return wrapper
@@ -34,6 +28,9 @@ class NotSupportLangException(LinguisterException):
     def __init__(self, message='Not support this language'):
         super().__init__(message)
 
+class ConfigException(LinguisterException):
+    def __init__(self, message="Config Exception"):
+        super().__init__(message)
 
 class SymbolException(LinguisterException):
     def __init__(self,

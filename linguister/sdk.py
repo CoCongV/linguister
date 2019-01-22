@@ -202,7 +202,7 @@ class BingSDK(BaseTranslateSDK):
                 'q': words,
                 'format': 'application/json'
             })
-    
+
     @catch_req()
     async def translate(self, words: str):
         return await self.session.get(

@@ -34,6 +34,9 @@ class NotSupportLangException(LinguisterException):
     def __init__(self, message='Not support this language'):
         super().__init__(message)
 
+class ConfigException(LinguisterException):
+    def __init__(self, message="Config Exception"):
+        super().__init__(message)
 
 class SymbolException(LinguisterException):
     def __init__(self,

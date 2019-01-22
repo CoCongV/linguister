@@ -30,6 +30,10 @@ class RequestException(LinguisterException):
     def __init__(self, message="Request Error"):
         super().__init__(message)
 
+class NotSupportLangException(LinguisterException):
+    def __init__(self, message='Not support this language'):
+        super().__init__(message)
+
 
 class SymbolException(LinguisterException):
     def __init__(self,

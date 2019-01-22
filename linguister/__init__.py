@@ -11,57 +11,47 @@ except ImportError:
 import click
 import colorama
 
-from linguister.exceptions import LinguisterException
-from linguister.sdk import IcibaSDK, YouDaoSDK
-from linguister.info import change_line, out
 from linguister.audio import play
+from linguister.exceptions import LinguisterException
+from linguister.info import change_line, out
+from linguister.sdk import IcibaSDK, YouDaoSDK
+from linguister.untils import generate_ph
 
 colorama.init(autoreset=True)
 loop = asyncio.get_event_loop()
-
-def generate_ph(en=None, us=None):
-    if not en:
-        en = str([])
-    else:
-        en = str([en])
-    if not us:
-        us = str([])
-    else:
-        us = str([us])
-    return 'US ' + us + ' UK ' + en
 
 async def iciba(words, session):
     iciba_sdk = IcibaSDK(session)
     try:
         response = await iciba_sdk.paraphrase(words)
     except (LinguisterException, ClientError) as e:
-        return {'source': 'iciba', 'exc': e}
+        return {"source": "iciba", "exc": e}
     result = await response.json()
     sentences = IcibaSDK.get_sentences(result)
-    base_info = result['baesInfo']
+    base_info = result["baesInfo"]
 
-    data = {'source': 'iciba'}
+    data = {"source": "iciba"}
     audio = None
     ph = None
-    if base_info.get('symbols'):
-        symbols = base_info['symbols']
-        ph = generate_ph(symbols[0].get('ph_am'), symbols[0].get('ph_en'))
-        audio = symbols[0].get('ph_am_mp3') or symbols[0].get('ph_en_mp3')
+    if base_info.get("symbols"):
+        symbols = base_info["symbols"]
+        ph = generate_ph(symbols[0].get("ph_am"), symbols[0].get("ph_en"))
+        audio = symbols[0].get("ph_am_mp3") or symbols[0].get("ph_en_mp3")
         means = IcibaSDK.get_means(symbols)
-        data['means'] = means
+        data["means"] = means
     else:
         ph = generate_ph()
         data.update({
-            'translate_msg': base_info['translate_msg'],
-            'translate_result': base_info['translate_result']
+            "translate_msg": base_info["translate_msg"],
+            "translate_result": base_info["translate_result"]
         })
 
     response.release()
     data.update({
-        'audio': audio,
-        'ph': ph,
-        'sentences': sentences,
-        'words': words
+        "audio": audio,
+        "ph": ph,
+        "sentences": sentences,
+        "words": words
     })
     return data
 
@@ -71,13 +61,13 @@ async def youdao(words, session):
     try:
         response = await youdao_sdk.paraphrase(words)
     except (LinguisterException, ClientError) as e:
-        return {'source': 'youdao', 'exc': e}
+        return {"source": "youdao", "exc": e}
 
     result = await response.json()
-    ec_dict = result.get('ec')
+    ec_dict = result.get("ec")
     if ec_dict:
-        ph = generate_ph(ec_dict['word'][0].get('usphone'),
-                        ec_dict['word'][0].get('ukphone'))
+        ph = generate_ph(ec_dict["word"][0].get("usphone"),
+                        ec_dict["word"][0].get("ukphone"))
     else:
         ph = generate_ph()
 
@@ -85,16 +75,16 @@ async def youdao(words, session):
     sentences = YouDaoSDK.get_sentences(result)
     response.release()
     return {
-        'ph': ph,
-        'means': means,
-        'sentences': sentences,
-        'source': 'youdao',
-        'audio': None,
-        'words': words
+        "ph": ph,
+        "means": means,
+        "sentences": sentences,
+        "source": "youdao",
+        "audio": None,
+        "words": words
     }
 
 
-async def run(words, say):
+async def run(words, say, origin, dest):
     tasks = []
     async with aiohttp.ClientSession() as session:
         task = asyncio.ensure_future(iciba(words, session))
@@ -111,16 +101,18 @@ async def run(words, say):
         out(res)
         if say:
             if not audio:
-                if res.get('audio'):
-                    audio = res['audio']
+                if res.get("audio"):
+                    audio = res["audio"]
     if audio:
         play(audio)
 
 @click.command()
-@click.argument('words', nargs=-1, type=click.STRING)
-@click.option('-s', '--say', default=False, help="play audio", type=click.BOOL)
-def cli(words, say=True):
-    words = ' '.join(words)
+@click.argument("words", nargs=-1, type=click.STRING)
+@click.option("-s", "--say", default=False, help="play audio", type=click.BOOL)
+@click.option("-o", "--origin", default="en", help="origin language")
+@click.option("-d", "--dest", default="cn", help="destination language")
+def cli(words, say, origin, dest):
+    words = " ".join(words)
 
-    future = asyncio.ensure_future(run(words, say))
+    future = asyncio.ensure_future(run(words, say, origin, dest))
     loop.run_until_complete(future)

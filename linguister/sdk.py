@@ -9,11 +9,16 @@ import time
 from urllib.parse import urlencode
 from uuid import uuid4
 
-from linguister.exceptions import catch_req, SymbolException
+from linguister.exceptions import (catch_req, SymbolException, NotSupportLangException)
 
 
 class BaseTranslateSDK:
-    symbols = {}
+    zh = 'zh' # China
+    en = 'en' # English
+    jp = 'jp' # Japan
+    de = 'de' # German
+    fr = 'fr' # France
+    es = 'es' # Spain
 
     def generate_random_str(self, length=24) -> str:
         return ''.join(
@@ -22,15 +27,12 @@ class BaseTranslateSDK:
 
     def generate_timestamp(self) -> int:
         return int(time.time())
-
-    def get_lang_symbol(self, symbol):
-        v = self.symbols.get(symbol)
-        if not v:
-            raise SymbolException(
-                "{}: Don't supported this language or symbol error.".format(
-                    symbol))
-        else:
-            return v
+    
+    def trans_symbol(self, origin, dest):
+        if not (hasattr(self, origin) and hasattr(self, dest)):
+            raise NotSupportLangException()
+        
+        return getattr(self, origin), getattr(self, dest)
 
 class YouDaoSDK:
     """
@@ -48,7 +50,7 @@ class YouDaoSDK:
         self.paraphrase_url = paraphrase_url
         self.translate_url = translate_url
 
-    async def suggest(self, word, lang='eng', num=5, doctype='json'):
+    async def interface(self, word, lang='eng', num=5, doctype='json'):
         return await self.session.get(
             self.suggest_url,
             params={
@@ -111,6 +113,7 @@ class YouDaoSDK:
 
 
 class IcibaSDK(BaseTranslateSDK):
+    jp = 'ja'
 
     def __init__(
             self,
@@ -142,12 +145,13 @@ class IcibaSDK(BaseTranslateSDK):
             })
         return response
 
-    async def translate(self, word, a="fy", from_="auto", to="auto"):
+    async def translate(self, word, a="fy", origin="auto", dest="auto"):
+        origin, dest = self.trans_symbol(origin, dest)
         response = await self.session.get(
             self.trans_url, params={
                 'a': a,
-                'f': from_,
-                't': to,
+                'f': origin,
+                't': dest,
                 'w': word
             })
         return response

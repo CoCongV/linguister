@@ -6,7 +6,7 @@ from setuptools import (
 
 requires = [
     'aiohttp', 'click', 'requests', 'colorama', 'playsound', 'pygobject',
-    'pycairo'
+    'pycairo', 'toml'
 ]
 
 with open(join(dirname(__file__), 'linguister/VERSION.txt'), 'rb') as f:

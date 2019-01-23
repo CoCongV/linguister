@@ -5,7 +5,7 @@ from linguister.sdk import IcibaSDK, YouDaoSDK, BingSDK, GoogleSDK
 from linguister.utils import generate_ph
 
 
-async def iciba(words, session):
+async def iciba(words, session, aiohttp_args):
     iciba_sdk = IcibaSDK(session)
     try:
         response = await iciba_sdk.paraphrase(words)
@@ -44,7 +44,7 @@ async def iciba(words, session):
     })
     return data
 
-async def youdao(words, session):
+async def youdao(words, session, aiohttp_args):
     youdao_sdk = YouDaoSDK(session)
 
     try:
@@ -72,7 +72,8 @@ async def youdao(words, session):
         "words": words
     }
 
-async def bing(words, session):
+async def bing(words, session, aiohttp_args):
+    # TODO:
     bing_sdk = BingSDK(session)
 
     try:
@@ -83,7 +84,7 @@ async def bing(words, session):
     # result = await response.json()
     print(await response.text())
 
-async def google(words, session):
+async def google(words, session, aiohttp_args):
     google_sdk = GoogleSDK(session)
     result = await google_sdk.translate(words)
     ph = generate_ph(

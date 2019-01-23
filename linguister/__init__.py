@@ -23,8 +23,9 @@ loop = asyncio.get_event_loop()
 conf = Config()
 conf.load_toml()
 
-async def run(words, say, origin, dest):
+async def run(words, say, origin, dest, proxy):
     tasks = []
+    http_args = {'proxy': proxy}
     async with aiohttp.ClientSession(
             headers={'User-Agent': DEFAULT_USER_AGENT}) as session:
         for sdk in conf.SDKS:
@@ -64,10 +65,10 @@ def cli():
 @click.option("-s", "--say/--no-say", default=False, help="play audio")
 @click.option("-o", "--origin", default="en", help="origin language")
 @click.option("-d", "--dest", default="cn", help="destination language")
-def translate(words, say, origin, dest):
+@click.option("-p", "--proxy", default=None, help="http or https proxy")
+def translate(words, say, origin, dest, proxy):
     words = " ".join(words)
-
-    future = asyncio.ensure_future(run(words, say, origin, dest))
+    future = asyncio.ensure_future(run(words, say, origin, dest, proxy))
     loop.run_until_complete(future)
 
 

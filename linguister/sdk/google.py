@@ -6,10 +6,14 @@ import math
 import random
 import re
 import time
+from urllib.parse import urlencode
 
 from aiohttp import ClientSession
+from requests import Session
 
 from linguister.const import DEFAULT_USER_AGENT
+from linguister.exceptions import catch_req
+from linguister.sdk import BaseTranslateSDK
 
 BASE = 'https://translate.google.com'
 TRANSLATE = 'https://{host}/translate_a/single'
@@ -50,8 +54,8 @@ def legacy_format_json(original):
         if i % 2 == 0:
             j = int(i / 2)
             nxt = text.find('"', p)
-            # replacing a portion of a string
-            # use slicing to extract those parts of the original string to be kept
+            # replacing a portion of a string use slicing to
+            # extract those parts of the original string to be kept
             text = text[:p] + states[j][1] + text[nxt:]
 
     converted = json.loads(text)
@@ -72,20 +76,30 @@ def rshift(val, n):
     return (val % 0x100000000) >> n
 
 def build_params(query, src, dest, token):
-    params = {
-        'client': 't',
-        'sl': src,
-        'tl': dest,
-        'hl': dest,
-        'dt': ['at', 'bd', 'ex', 'ld', 'md', 'qca', 'rw', 'rm', 'ss', 't'],
-        'ie': 'UTF-8',
-        'oe': 'UTF-8',
-        'otf': 1,
-        'ssel': 0,
-        'tsel': 0,
-        'tk': token,
-        'q': query,
-    }
+    params = [
+        ('client', 't'),
+        ('sl', src),
+        ('tl', dest),
+        ('hl', dest),
+        ('dt', 'at'),
+        ('dt', 'bd'),
+        ('dt', 'ex'),
+        ('dt', 'ld'),
+        ('dt', 'md'),
+        ('dt', 'qca'),
+        ('dt', 'rw'),
+        ('dt', 'rm'),
+        ('dt', 'ss'),
+        ('dt', 't'),
+        # 'dt': ['at', 'bd', 'ex', 'ld', 'md', 'qca', 'rw', 'rm', 'ss', 't'],
+        ('ie', 'UTF-8'),
+        ('oe', 'UTF-8'),
+        ('otf', 1),
+        ('ssel', 0),
+        ('tsel', 0),
+        ('tk', token),
+        ('q', query),
+    ]
     return params
 
 
@@ -133,7 +147,7 @@ class TokenAcquirer:
 
         r = await self.session.get(self.host)
 
-        raw_tkk = self.RE_TKK.search(r.text)
+        raw_tkk = self.RE_TKK.search(await r.text())
         if raw_tkk:
             self.tkk = raw_tkk.group(1)
             return
@@ -274,7 +288,7 @@ class TokenAcquirer:
         tk = self.acquire(text)
         return tk
 
-class Translator(object):
+class Translator:
     """Google Translate ajax API implementation class
 
     You have to create an instance of Translator to use this API
@@ -299,15 +313,11 @@ class Translator(object):
     def __init__(self,
                  session: ClientSession,
                  service_urls=None,
-                 user_agent=DEFAULT_USER_AGENT,
-                 proxies=None):
+                 user_agent=DEFAULT_USER_AGENT):
 
         self.session = session
         # if proxies is not None:
         #     self.session.proxies = proxies
-        # self.session.headers.update({
-        #     'User-Agent': user_agent,
-        # })
 
         self.service_urls = service_urls or ['translate.google.com']
         self.token_acquirer = TokenAcquirer(
@@ -320,12 +330,10 @@ class Translator(object):
 
     async def _translate(self, text, dest, src):
         token = await self.token_acquirer.do(text)
-        params = build_params(query=text, src=src, dest=dest,
-                                    token=token)
+        params = build_params(query=text, src=src, dest=dest, token=token)
         url = TRANSLATE.format(host=self._pick_service_url())
         r = await self.session.get(url, params=params)
-
-        data = format_json(r.text)
+        data = format_json(await r.text())
         return data
 
     def _parse_extra_data(self, data):
@@ -423,7 +431,7 @@ class Translator(object):
 
         extra_data = self._parse_extra_data(data)
 
-        # actual source language that will be recognized by Google Translator 
+        # actual source language that will be recognized by Google Translator
         # when the src passed is equal to auto.
         try:
             src = data[2]
@@ -448,3 +456,27 @@ class Translator(object):
         }
 
         return result
+
+
+class GoogleSDK(BaseTranslateSDK):
+
+    def __init__(self, session, url=BASE):
+        self.session = session
+        self.url = BASE
+        self.translator = Translator(session)
+
+    async def translate(self, words, origin="auto", dest="zh-cn"):
+        result = await self.translator.translate(words, dest, origin)
+        return result
+
+    def get_sentences(self, result):
+        examples = []
+        for i in result['extra_data']['examples'][0][:3]:
+            examples.append({'example': i[0], 'translate': ''})
+        return examples
+    
+    def get_means(self, result):
+        means = []
+        for mean in result['extra_data']['all-translations']:
+            means.append(mean[0] + ' ' + '; '.join(mean[1]))
+        return means

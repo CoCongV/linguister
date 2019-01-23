@@ -62,7 +62,7 @@ class YouDaoSDK:
             self.paraphrase_url + '?' + params)
 
     @staticmethod
-    def get_mean_list(dict_):
+    def get_means(dict_):
         result = []
         if dict_.get('ec'):
             trs = dict_['ec']['word'][0]['trs']

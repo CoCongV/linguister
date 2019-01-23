@@ -25,7 +25,8 @@ conf.load_toml()
 
 async def run(words, say, origin, dest):
     tasks = []
-    async with aiohttp.ClientSession(headers=DEFAULT_USER_AGENT) as session:
+    async with aiohttp.ClientSession(
+            headers={'User-Agent': DEFAULT_USER_AGENT}) as session:
         for sdk in conf.SDKS:
             try:
                 async_func = getattr(main, sdk)

@@ -25,3 +25,6 @@ class BaseTranslateSDK:
             raise NotSupportLangException()
 
         return getattr(self, origin), getattr(self, dest)
+    
+    def get_means(self, *args, **kwargs) -> list:
+        pass

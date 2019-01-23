@@ -25,7 +25,7 @@ class TestSDK:
                 else:
                     ph = generate_ph()
 
-                means = YouDaoSDK.get_mean_list(result)
+                means = YouDaoSDK.get_means(result)
                 sentences = YouDaoSDK.get_sentences(result)
                 response.release()
                 return {

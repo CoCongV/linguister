@@ -25,12 +25,12 @@ conf.load_toml()
 
 async def run(words, say, origin, dest, proxy):
     tasks = []
-    http_args = {'proxy': proxy}
+    aiohttp_args = {'proxy': proxy}
     async with aiohttp.ClientSession(
             headers={'User-Agent': DEFAULT_USER_AGENT}) as session:
         for sdk in conf.SDKS:
             try:
-                async_func = getattr(main, sdk)
+                async_obj = getattr(main, sdk)(words, session, aiohttp_args)
             except AttributeError as e:
                 msg = "SDK Load Exception, sdk: {}, detail: {}".format(
                     sdk, str(e))
@@ -39,7 +39,7 @@ async def run(words, say, origin, dest, proxy):
                     raise ConfigException(msg)
                 else:
                     continue
-            task = asyncio.ensure_future(async_func(words, session))
+            task = asyncio.ensure_future(async_obj())
             tasks.append(task)
 
         responses = await asyncio.gather(*tasks)

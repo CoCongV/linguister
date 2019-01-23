@@ -1,7 +1,7 @@
 from aiohttp.client_exceptions import ClientError
 
 from linguister.exceptions import LinguisterException, RequestException
-from linguister.sdk import IcibaSDK, YouDaoSDK, BingSDK
+from linguister.sdk import IcibaSDK, YouDaoSDK, BingSDK, GoogleSDK
 from linguister.utils import generate_ph
 
 
@@ -24,7 +24,7 @@ async def iciba(words, session):
     ph = None
     if base_info.get("symbols"):
         symbols = base_info["symbols"]
-        ph = generate_ph(symbols[0].get("ph_am"), symbols[0].get("ph_en"))
+        ph = generate_ph(US=symbols[0].get("ph_am"), UK=symbols[0].get("ph_en"))
         audio = symbols[0].get("ph_am_mp3") or symbols[0].get("ph_en_mp3")
         means = IcibaSDK.get_means(symbols)
         data["means"] = means
@@ -55,12 +55,12 @@ async def youdao(words, session):
     result = await response.json()
     ec_dict = result.get("ec")
     if ec_dict:
-        ph = generate_ph(ec_dict["word"][0].get("usphone"),
-                        ec_dict["word"][0].get("ukphone"))
+        ph = generate_ph(US=ec_dict["word"][0].get("usphone"),
+                        UK=ec_dict["word"][0].get("ukphone"))
     else:
         ph = generate_ph()
 
-    means = YouDaoSDK.get_mean_list(result)
+    means = YouDaoSDK.get_means(result)
     sentences = YouDaoSDK.get_sentences(result)
     response.release()
     return {
@@ -82,3 +82,19 @@ async def bing(words, session):
 
     # result = await response.json()
     print(await response.text())
+
+async def google(words, session):
+    google_sdk = GoogleSDK(session)
+    result = await google_sdk.translate(words)
+    ph = generate_ph(
+        Origin=result['pronunciation'],
+        Dest=result['extra_data']['translation'][1][-1])
+
+    return {
+        'words': words,
+        'audio': None,
+        'source': 'Google',
+        'ph': ph,
+        'sentences': google_sdk.get_sentences(result),
+        'means': google_sdk.get_means(result)
+    }

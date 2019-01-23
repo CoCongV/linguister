@@ -1,11 +1,10 @@
 
-def generate_ph(en=None, us=None):
-    if not en:
-        en = str([])
+# def generate_ph(en=None, us=None):
+def generate_ph(**kwargs):
+    if kwargs:
+        string = ''
+        for k, v in kwargs.items():
+            string += '{} {}'.format(str(k), str(v))
     else:
-        en = str([en])
-    if not us:
-        us = str([])
-    else:
-        us = str([us])
-    return 'US ' + us + ' UK ' + en
+        string = '[]'
+    return string

@@ -23,6 +23,7 @@ playsound = "*"
 pygobject = "*"
 aiodns = "*"
 cchardet = "*"
+toml = "*"
 
 [requires]
 python_version = "3.5"

@@ -2,7 +2,8 @@ import asyncio
 
 import aiohttp
 
-from linguister import loop, generate_ph
+from linguister import loop
+from linguister.utils import generate_ph
 from linguister.sdk import YouDaoSDK, IcibaSDK
 
 
@@ -11,7 +12,7 @@ class TestSDK:
     def test_youdao(self):
         future = asyncio.ensure_future(self.youdao())
         loop.run_until_complete(future)
-    
+
     async def youdao(self):
         async with aiohttp.ClientSession() as session:
             for words in self.words:
@@ -20,12 +21,13 @@ class TestSDK:
                 result = await response.json()
                 ec_dict = result.get('ec')
                 if ec_dict:
-                    ph = generate_ph(ec_dict['word'][0].get('usphone'),
-                                    ec_dict['word'][0].get('ukphone'))
+                    ph = generate_ph(
+                        US=ec_dict['word'][0].get('usphone'),
+                        UK=ec_dict['word'][0].get('ukphone'))
                 else:
                     ph = generate_ph()
 
-                means = YouDaoSDK.get_mean_list(result)
+                means = YouDaoSDK.get_means(result)
                 sentences = YouDaoSDK.get_sentences(result)
                 response.release()
                 return {
@@ -36,11 +38,11 @@ class TestSDK:
                     'audio': None,
                     'words': words
                 }
-    
+
     def test_iciba(self):
         future = asyncio.ensure_future(self.iciba())
         loop.run_until_complete(future)
-    
+
     async def iciba(self):
         async with aiohttp.ClientSession() as session:
             for words in self.words:
@@ -55,7 +57,7 @@ class TestSDK:
                 ph = None
                 if base_info.get('symbols'):
                     symbols = base_info['symbols']
-                    ph = generate_ph(symbols[0].get('ph_am'), symbols[0].get('ph_en'))
+                    ph = generate_ph(US=symbols[0].get('ph_am'), UK=symbols[0].get('ph_en'))
                     audio = symbols[0].get('ph_am_mp3') or symbols[0].get('ph_en_mp3')
                     means = IcibaSDK.get_means(symbols)
                     data['means'] = means

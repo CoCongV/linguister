@@ -15,7 +15,7 @@ with open(join(dirname(__file__), 'linguister/VERSION.txt'), 'rb') as f:
 setup(
     name='linguister',
     version=version,
-    description='',
+    description='Terminal translation tool',
     packages=find_packages(exclude=[]),
     author='CoCong',
     author_email='cong.lv.yx@gmail.com',
@@ -27,10 +27,11 @@ setup(
     zip_safe=False,
     entry_points={
         "console_scripts": [
-            'translator = linguister:cli',
-            'trans = linguister:cli',
-            'fy = linguister:cli',
-            'linguister = linguister:cli'
+            'translator = linguister:translate',
+            'trans = linguister:translate',
+            'fy = linguister:translate',
+            'linguister = linguister:translate',
+            'linguister-cli = linguister:cli'
         ]
     },
     classifiers=[
@@ -45,6 +46,6 @@ setup(
         'pytest-runner',
     ],
     tests_require=[
-        'translator', 'pytest', 'pytest_cov', 'nose',
+        'linguister', 'pytest', 'pytest_cov', 'nose',
     ],
 )

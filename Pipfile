@@ -21,6 +21,8 @@ uvloop = "*"
 colorama = "*"
 playsound = "*"
 pygobject = "*"
+aiodns = "*"
+cchardet = "*"
 
 [requires]
 python_version = "3.5"

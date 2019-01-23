@@ -9,10 +9,10 @@ from linguister.utils import generate_ph
 
 class SDKRunner(ABC):
 
-    def __init__(self, words, session, aiohttp_args):
+    def __init__(self, words, session, conf):
         self.words = words
         self.session = session
-        self.aiohttp_args = aiohttp_args
+        self.conf = conf
     
     @abstractmethod
     async def __call__(self):
@@ -21,7 +21,7 @@ class SDKRunner(ABC):
 class Iciba(SDKRunner):
 
     async def __call__(self):
-        iciba_sdk = IcibaSDK(self.session)
+        iciba_sdk = IcibaSDK(self.session, proxy=self.conf.proxy)
         try:
             response = await iciba_sdk.paraphrase(self.words)
             result = await response.json()
@@ -104,7 +104,7 @@ async def bing(words, session, aiohttp_args):
 class Google(SDKRunner):
 
     async def __call__(self):
-        google_sdk = GoogleSDK(self.session)
+        google_sdk = GoogleSDK(self.session, proxy=self.conf.proxy)
         result = await google_sdk.translate(self.words)
         ph = generate_ph(
             Origin=result['pronunciation'],

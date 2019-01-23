@@ -132,10 +132,11 @@ class TokenAcquirer:
     RE_TKK = re.compile(r'tkk:\'(.+?)\'', re.DOTALL)
     RE_RAWTKK = re.compile(r'tkk:\'(.+?)\'', re.DOTALL)
 
-    def __init__(self, session, tkk='0', host='translate.google.com'):
+    def __init__(self, session, tkk='0', host='translate.google.com', proxy=None):
         self.session = session
         self.tkk = tkk
         self.host = host if 'http' in host else 'https://' + host
+        self.proxy = proxy
 
     async def _update(self):
         """update tkk
@@ -145,7 +146,7 @@ class TokenAcquirer:
         if self.tkk and int(self.tkk.split('.')[0]) == now:
             return
 
-        r = await self.session.get(self.host)
+        r = await self.session.get(self.host, proxy=self.proxy)
 
         raw_tkk = self.RE_TKK.search(await r.text())
         if raw_tkk:
@@ -288,40 +289,14 @@ class TokenAcquirer:
         tk = self.acquire(text)
         return tk
 
-class Translator:
-    """Google Translate ajax API implementation class
 
-    You have to create an instance of Translator to use this API
+class GoogleSDK(BaseTranslateSDK):
 
-    :param service_urls: google translate url list. URLs will be used randomly.
-                         For example ``['translate.google.com', 'translate.google.co.kr']``
-    :type service_urls: a sequence of strings
-
-    :param user_agent: the User-Agent header to send when making requests.
-    :type user_agent: :class:`str`
-
-    :param proxies: proxies configuration. 
-                    Dictionary mapping protocol or protocol and host to the URL of the proxy 
-                    For example ``{'http': 'foo.bar:3128', 'http://host.name': 'foo.bar:4012'}``
-    :type proxies: dictionary
-
-    :param timeout: Definition of timeout for Requests library.
-                    Will be used by every request.
-    :type timeout: number or a double of numbers
-    """
-
-    def __init__(self,
-                 session: ClientSession,
-                 service_urls=None,
-                 user_agent=DEFAULT_USER_AGENT):
-
-        self.session = session
-        # if proxies is not None:
-        #     self.session.proxies = proxies
-
+    def __init__(self, session, service_urls=None, proxy=None):
+        super().__init__(session, proxy)
         self.service_urls = service_urls or ['translate.google.com']
         self.token_acquirer = TokenAcquirer(
-            session=self.session, host=self.service_urls[0])
+            session=self.session, host=self.service_urls[0], proxy=self.proxy)
 
     def _pick_service_url(self):
         if len(self.service_urls) == 1:
@@ -332,7 +307,7 @@ class Translator:
         token = await self.token_acquirer.do(text)
         params = build_params(query=text, src=src, dest=dest, token=token)
         url = TRANSLATE.format(host=self._pick_service_url())
-        r = await self.session.get(url, params=params)
+        r = await self._get(url, params=params)
         data = format_json(await r.text())
         return data
 
@@ -358,7 +333,7 @@ class Translator:
 
         return extra
 
-    async def translate(self, text, dest='en', src='auto'):
+    async def translate(self, text,  origin='auto', dest='zh-cn'):
         """Translate text from source language to destination language
 
         :param text: The source text(s) to be translated. Batch translation is supported via sequence input.
@@ -398,13 +373,13 @@ class Translator:
             the lazy dog  ->  게으른 개
         """
         dest = dest.lower().split('_', 1)[0]
-        src = src.lower().split('_', 1)[0]
+        origin = origin.lower().split('_', 1)[0]
 
-        if src != 'auto' and src not in LANGUAGES:
-            if src in SPECIAL_CASES:
-                src = SPECIAL_CASES[src]
-            elif src in LANGCODES:
-                src = LANGCODES[src]
+        if origin != 'auto' and origin not in LANGUAGES:
+            if origin in SPECIAL_CASES:
+                origin = SPECIAL_CASES[origin]
+            elif origin in LANGCODES:
+                origin = LANGCODES[origin]
             else:
                 raise ValueError('invalid source language')
 
@@ -419,12 +394,12 @@ class Translator:
         if isinstance(text, list):
             result = []
             for item in text:
-                translated = self.translate(item, dest=dest, src=src)
+                translated = self.translate(item, dest=dest, origin=origin)
                 result.append(translated)
             return result
 
         origin = text
-        data = await self._translate(text, dest, src)
+        data = await self._translate(text, dest, origin)
 
         # this code will be updated when the format is changed.
         translated = ''.join([d[0] if d[0] else '' for d in data[0]])
@@ -434,7 +409,7 @@ class Translator:
         # actual source language that will be recognized by Google Translator
         # when the src passed is equal to auto.
         try:
-            src = data[2]
+            origin = data[2]
         except Exception:  # pragma: nocover
             pass
 
@@ -447,7 +422,7 @@ class Translator:
             pron = translated
 
         result = {
-            'src': src,
+            'src': origin,
             'dest': dest,
             'origin': origin,
             'text': translated,
@@ -455,18 +430,6 @@ class Translator:
             "extra_data": extra_data
         }
 
-        return result
-
-
-class GoogleSDK(BaseTranslateSDK):
-
-    def __init__(self, session, url=BASE):
-        self.session = session
-        self.url = BASE
-        self.translator = Translator(session)
-
-    async def translate(self, words, origin="auto", dest="zh-cn"):
-        result = await self.translator.translate(words, dest, origin)
         return result
 
     def get_sentences(self, result):

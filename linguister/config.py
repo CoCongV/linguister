@@ -1,5 +1,6 @@
 import os
 import platform
+from collections import UserDict
 
 import toml
 
@@ -7,16 +8,14 @@ unix_path = os.path.join(os.path.expanduser('~'), '.config/linguister/')
 conf_toml = os.path.join(unix_path, 'config.toml')
 
 
-class Config:
-    SDKS = ['iciba', 'youdao']
-    DEBUG = False
+class Config(UserDict):
+    data = {
+        'SDKS': ['Iciba', 'Youdao'],
+        'DEBUG': False
+    }
 
-    def __init__(self, SDKS=None, DEBUG=False):
-        self._init(SDKS, DEBUG)
-
-    def _init(self, SDKS=None, DEBUG=False):
-        self.SDKS = SDKS or self.SDKS
-        self.DEBUG = DEBUG or self.DEBUG
+    def __getattr__(self, key):
+        return super().__getitem__(key)
 
     def load_toml(self, path=conf_toml):
         try:
@@ -28,14 +27,10 @@ class Config:
             else:
                 return
         else:
-            self._init(**conf)
+            self.update(conf)
             return conf
-    
+
     def dump_toml(self, path=conf_toml):
-        conf_attr = {}
-        for k, v in self.__dict__.items():
-            if k.isupper():
-                conf_attr[k] = v
         with open(path, 'w') as f:
-            conf = toml.dump(conf_attr, f)
+            conf = toml.dump(self.data, f)
         return path

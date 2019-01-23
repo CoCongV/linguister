@@ -17,8 +17,9 @@ class IcibaSDK(BaseTranslateSDK):
             session,
             trans_url="http://fy.iciba.com/ajax.php",
             interface_url="http://dict-mobile.iciba.com/interface/index.php",
-            paraphrase_url="http://www.iciba.com/index.php"):
-        self.session = session
+            paraphrase_url="http://www.iciba.com/index.php",
+            proxy=None):
+        super().__init__(session, proxy)
         self.trans_url = trans_url
         self.interface_url = interface_url
         self.paraphrase_url = paraphrase_url
@@ -30,7 +31,7 @@ class IcibaSDK(BaseTranslateSDK):
                         cilent=6,
                         is_need_mean=1,
                         nums=5):
-        response = await self.session.get(
+        response = await self._get(
             self.interface_url,
             params={
                 'c': c,
@@ -39,12 +40,13 @@ class IcibaSDK(BaseTranslateSDK):
                 'client': cilent,
                 'is_need_mean': is_need_mean,
                 'word': word
-            })
+            },
+            proxy=self.proxy)
         return response
 
     async def translate(self, word, a="fy", origin="auto", dest="auto"):
         origin, dest = self.trans_symbol(origin, dest)
-        response = await self.session.get(
+        response = await self._get(
             self.trans_url, params={
                 'a': a,
                 'f': origin,
@@ -58,7 +60,8 @@ class IcibaSDK(BaseTranslateSDK):
         params = [('a', a), ('word', word), ('c', c)]
         for i in dict_list:
             params.append(('list', i))
-        return await self.session.get(self.paraphrase_url, params=params)
+        return await self._get(
+            self.paraphrase_url, params=params)
 
     @staticmethod
     def get_means(d) -> list:

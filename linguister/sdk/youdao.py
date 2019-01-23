@@ -4,7 +4,7 @@ from linguister.exceptions import catch_req
 from . import BaseTranslateSDK
 
 
-class YouDaoSDK:
+class YouDaoSDK(BaseTranslateSDK):
     """
     app_key: Application key
     app_id : Application ID
@@ -14,14 +14,15 @@ class YouDaoSDK:
                  session,
                  suggest_url='http://dict.youdao.com/suggest',
                  paraphrase_url="http://dict.youdao.com/jsonapi",
-                 translate_url="http://fanyi.youdao.com/translate"):
-        self.session = session
+                 translate_url="http://fanyi.youdao.com/translate",
+                 proxy=None):
+        super().__init__(session, proxy)
         self.suggest_url = suggest_url
         self.paraphrase_url = paraphrase_url
         self.translate_url = translate_url
 
     async def interface(self, word, lang='eng', num=5, doctype='json'):
-        return await self.session.get(
+        return await self._get(
             self.suggest_url,
             params={
                 'q': word,
@@ -58,7 +59,7 @@ class YouDaoSDK:
                 'dicts': dicts,
                 'network': network
             })
-        return await self.session.get(
+        return await self._get(
             self.paraphrase_url + '?' + params)
 
     @staticmethod

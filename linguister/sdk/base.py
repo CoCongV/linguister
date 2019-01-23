@@ -1,3 +1,4 @@
+from functools import partial
 import random
 import string
 import time
@@ -11,6 +12,11 @@ class BaseTranslateSDK:
     de = 'de' # German
     fr = 'fr' # France
     es = 'es' # Spain
+
+    def __init__(self, session, proxy):
+        self.session = session
+        self.proxy = proxy
+        self._get = partial(self.session.get, proxy=proxy)
 
     def generate_random_str(self, length=24) -> str:
         return ''.join(

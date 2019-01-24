@@ -9,10 +9,11 @@ from linguister.utils import generate_ph
 
 class SDKRunner(ABC):
 
-    def __init__(self, words, session, conf):
+    def __init__(self, words, session, conf, future):
         self.words = words
         self.session = session
         self.conf = conf
+        self.future = future
     
     @abstractmethod
     async def __call__(self):
@@ -57,7 +58,8 @@ class Iciba(SDKRunner):
             "sentences": sentences,
             "words": self.words
         })
-        return data
+        # return data
+        self.future.set_result(data)
 
 class Youdao(SDKRunner):
     async def __call__(self):
@@ -79,7 +81,7 @@ class Youdao(SDKRunner):
         means = YouDaoSDK.get_means(result)
         sentences = YouDaoSDK.get_sentences(result)
         response.release()
-        return {
+        data = {
             "ph": ph,
             "means": means,
             "sentences": sentences,
@@ -87,6 +89,7 @@ class Youdao(SDKRunner):
             "audio": None,
             "words": self.words
         }
+        self.future.set_result(data)
 
 async def bing(words, session, aiohttp_args):
     # TODO:
@@ -110,7 +113,7 @@ class Google(SDKRunner):
             Origin=result['pronunciation'],
             Dest=result['extra_data']['translation'][1][-1])
 
-        return {
+        data = {
             'words': self.words,
             'audio': None,
             'source': 'Google',
@@ -118,3 +121,4 @@ class Google(SDKRunner):
             'sentences': google_sdk.get_sentences(result),
             'means': google_sdk.get_means(result)
         }
+        self.future.set_result(data)

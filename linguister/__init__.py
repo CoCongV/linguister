@@ -1,4 +1,5 @@
 import asyncio
+from functools import partial
 
 import aiohttp
 from aiohttp.client_exceptions import ClientError
@@ -23,7 +24,17 @@ loop = asyncio.get_event_loop()
 conf = Config()
 conf.load_toml()
 
+is_play = False
+def _callback_out(future: asyncio.Future, say=False):
+    global is_play
+    result = future.result()
+    out(result)
+    if say and not is_play and result.get('audio'):
+        play(result['audio'])
+        is_play = True
+
 async def run(words, say, origin, dest, proxy):
+    callback_out = partial(_callback_out, say=say)
     tasks = []
     conf.update({'proxy': proxy})
     timeout = aiohttp.ClientTimeout(total=10)
@@ -31,7 +42,8 @@ async def run(words, say, origin, dest, proxy):
             headers={'User-Agent': DEFAULT_USER_AGENT}, timeout=timeout) as session:
         for sdk in conf.SDKS:
             try:
-                async_obj = getattr(main, sdk)(words, session, conf)
+                future = asyncio.Future()
+                async_obj = getattr(main, sdk)(words, session, conf, future)
             except AttributeError as e:
                 msg = "SDK Load Exception, sdk: {}, detail: {}".format(
                     sdk, str(e))
@@ -40,22 +52,13 @@ async def run(words, say, origin, dest, proxy):
                     raise ConfigException(msg)
                 else:
                     continue
-            task = asyncio.ensure_future(async_obj())
-            tasks.append(task)
+            else:
+                future.add_done_callback(callback_out)
+                task = asyncio.ensure_future(async_obj())
+                tasks.append(task)
 
-        responses = await asyncio.gather(*tasks)
+        await asyncio.gather(*tasks)
     change_line()
-
-    audio = None
-    for res in responses:
-        if res:
-            out(res)
-        if say and res:
-            if not audio:
-                if res.get("audio"):
-                    audio = res["audio"]
-    if audio:
-        play(audio)
 
 @click.group()
 def cli():

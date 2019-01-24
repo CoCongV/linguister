@@ -65,6 +65,14 @@ def cli():
     pass
 
 @cli.command()
+def version():
+    from os.path import dirname, join
+    if version:
+        with open(join(dirname(__file__), 'VERSION.txt'), 'rb') as f:
+            v = f.read().decode('ascii').strip()
+            print('linguister' + ' ' + v)
+
+@cli.command()
 @click.argument("words", nargs=-1, type=click.STRING, required=True)
 @click.option("-s", "--say/--no-say", default=False, help="play audio")
 @click.option("-o", "--origin", default="en", help="origin language")

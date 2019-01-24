@@ -14,10 +14,11 @@ import colorama
 from linguister import main
 from linguister.audio import play
 from linguister.config import Config
+from linguister.const import DEFAULT_USER_AGENT
 from linguister.errout import err
 from linguister.exceptions import ConfigException
 from linguister.info import change_line, out
-from linguister.const import DEFAULT_USER_AGENT
+from linguister.__version__ import __version__
 
 colorama.init(autoreset=True)
 loop = asyncio.get_event_loop()
@@ -61,16 +62,9 @@ async def run(words, say, origin, dest, proxy):
     change_line()
 
 @click.group()
+@click.version_option(prog_name="linguister", version=__version__)
 def cli():
     pass
-
-@cli.command()
-def version():
-    from os.path import dirname, join
-    if version:
-        with open(join(dirname(__file__), 'VERSION.txt'), 'rb') as f:
-            v = f.read().decode('ascii').strip()
-            print('linguister' + ' ' + v)
 
 @cli.command()
 @click.argument("words", nargs=-1, type=click.STRING, required=True)

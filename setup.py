@@ -1,21 +1,30 @@
-from os.path import dirname, join
+import codecs
+import os
 from setuptools import (
     find_packages,
     setup,
 )
+
+about = {}
+here = os.path.abspath(os.path.dirname(__file__))
+
+with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as f:
+    long_description = "\n" + f.read()
+
+with open(os.path.join(here, "linguister", "__version__.py")) as f:
+    exec(f.read(), about)
 
 requires = [
     'aiohttp', 'click', 'requests', 'colorama', 'playsound', 'pygobject',
     'pycairo', 'toml'
 ]
 
-with open(join(dirname(__file__), 'linguister/VERSION.txt'), 'rb') as f:
-    version = f.read().decode('ascii').strip()
-
 setup(
     name='linguister',
-    version=version,
+    version=about['__version__'],
     description='Terminal translation tool',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     packages=find_packages(exclude=[]),
     author='CoCong',
     author_email='cong.lv.yx@gmail.com',

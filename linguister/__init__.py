@@ -44,7 +44,7 @@ async def run(words, say, origin, dest, proxy):
         for sdk in conf.SDKS:
             try:
                 future = asyncio.Future()
-                async_obj = getattr(main, sdk)(words, session, conf, future)
+                async_obj = getattr(main, sdk)(session, conf, future)
             except AttributeError as e:
                 msg = "SDK Load Exception, sdk: {}, detail: {}".format(
                     sdk, str(e))
@@ -55,7 +55,7 @@ async def run(words, say, origin, dest, proxy):
                     continue
             else:
                 future.add_done_callback(callback_out)
-                task = asyncio.ensure_future(async_obj())
+                task = asyncio.ensure_future(async_obj(words))
                 tasks.append(task)
 
         await asyncio.gather(*tasks)

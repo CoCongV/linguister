@@ -9,22 +9,21 @@ from linguister.utils import generate_ph
 
 class SDKRunner(ABC):
 
-    def __init__(self, words, session, conf, future):
-        self.words = words
+    def __init__(self, session, conf, future):
         self.session = session
         self.conf = conf
         self.future = future
     
     @abstractmethod
-    async def __call__(self):
+    async def __call__(self, words):
         pass
 
 class Iciba(SDKRunner):
 
-    async def __call__(self):
+    async def __call__(self, words):
         iciba_sdk = IcibaSDK(self.session, proxy=self.conf.proxy)
         try:
-            response = await iciba_sdk.paraphrase(self.words)
+            response = await iciba_sdk.paraphrase(words)
             result = await response.json()
             if result.get('errno'):
                 raise RequestException(
@@ -56,17 +55,17 @@ class Iciba(SDKRunner):
             "audio": audio,
             "ph": ph,
             "sentences": sentences,
-            "words": self.words
+            "words": words
         })
         # return data
         self.future.set_result(data)
 
 class Youdao(SDKRunner):
-    async def __call__(self):
+    async def __call__(self, words):
         youdao_sdk = YouDaoSDK(self.session)
 
         try:
-            response = await youdao_sdk.paraphrase(self.words)
+            response = await youdao_sdk.paraphrase(words)
         except (LinguisterException, ClientError) as e:
             return {"source": "youdao", "exc": e}
 
@@ -87,7 +86,7 @@ class Youdao(SDKRunner):
             "sentences": sentences,
             "source": "youdao",
             "audio": None,
-            "words": self.words
+            "words": words
         }
         self.future.set_result(data)
 
@@ -106,15 +105,15 @@ async def bing(words, session, aiohttp_args):
 
 class Google(SDKRunner):
 
-    async def __call__(self):
+    async def __call__(self, words):
         google_sdk = GoogleSDK(self.session, proxy=self.conf.proxy)
-        result = await google_sdk.translate(self.words)
+        result = await google_sdk.translate(words)
         ph = generate_ph(
             Origin=result['pronunciation'],
             Dest=result['extra_data']['translation'][1][-1])
 
         data = {
-            'words': self.words,
+            'words': words,
             'audio': None,
             'source': 'Google',
             'ph': ph,

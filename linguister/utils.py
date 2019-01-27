@@ -1,5 +1,3 @@
-
-# def generate_ph(en=None, us=None):
 def generate_ph(**kwargs):
     if kwargs:
         string = ''

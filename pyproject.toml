@@ -1,0 +1,39 @@
+[project]
+name = "linguister"
+version = "0.2.1"
+description = ""
+authors = [
+    {name = "CongCo", email = "cong.lv.yx@gmail.com"},
+]
+dependencies = ["click", "aiohttp", "colorama", "playsound", "aiodns", "cchardet", "toml"]
+requires-python = ">=3.9"
+dynamic = ["classifiers"]
+license = {text = "MIT"}
+
+[project.urls]
+homepage = ""
+
+[build-system]
+requires = ["pdm-pep517"]
+build-backend = "pdm.pep517.api"
+
+
+[tool]
+[tool.pdm]
+[[tool.pdm.source]]
+name = "pypi"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+verify_ssl = true
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "ipython",
+    "flake8",
+    "rope",
+    "pylint",
+    "yapf",
+    "requests",
+    "pytest",
+    "pytest-cov",
+    "nose",
+]

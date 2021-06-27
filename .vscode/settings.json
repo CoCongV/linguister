@@ -1,3 +1,16 @@
 {
-    "python.pythonPath": "/home/lvcong/.local/share/virtualenvs/translator-eZJJCAIh/bin/python"
+    "python.pythonPath": "~/.pyenv/shims/python",
+    "python.autoComplete.extraPaths": [
+        "__pypackages__/3.9/lib"
+    ],
+    "python.analysis.extraPaths": [
+        "__pypackages__/3.9/lib"
+    ],
+    "python.linting.flake8Enabled": true,
+    "python.formatting.provider": "yapf",
+    "python.formatting.yapfPath": "__pypackages__/3.9/bin/yapf",
+    "python.linting.pylintEnabled": true,
+    "python.linting.pylintPath": "__pypackages__/3.9/bin/pylint",
+    "python.linting.enabled": true,
+    "python.linting.flake8Path": "__pypackages__/3.9/bin/flake8",
 }

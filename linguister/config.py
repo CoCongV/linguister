@@ -1,11 +1,10 @@
+import json
 import os
 import platform
 from collections import UserDict
 
-import toml
-
 unix_path = os.path.join(os.path.expanduser('~'), '.config/linguister/')
-conf_toml = os.path.join(unix_path, 'config.toml')
+conf_file = os.path.join(unix_path, 'config.json')
 
 
 class Config(UserDict):
@@ -16,10 +15,10 @@ class Config(UserDict):
     def __getattr__(self, key):
         return super().__getitem__(key)
 
-    def load_toml(self, path=conf_toml):
+    def load_conf(self, path=conf_file):
         try:
-            with open(conf_toml, 'r') as f:
-                conf = toml.load(f)
+            with open(conf_file, 'r') as f:
+                conf = json.load(f)
         except FileNotFoundError as e:
             if self.DEBUG:
                 raise e
@@ -29,7 +28,7 @@ class Config(UserDict):
             self.update(conf)
             return conf
 
-    def dump_toml(self, path=conf_toml):
+    def dump_conf(self, path=conf_file):
         with open(path, 'w') as f:
-            conf = toml.dump(self.data, f)
+            conf = json.dump(self.data, f)
         return path

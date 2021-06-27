@@ -3,11 +3,6 @@ from functools import partial
 
 import aiohttp
 from aiohttp.client_exceptions import ClientError
-try:
-    import uvloop
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-except ImportError:
-    pass
 import click
 import colorama
 
@@ -23,7 +18,7 @@ from linguister.__version__ import __version__
 colorama.init(autoreset=True)
 loop = asyncio.get_event_loop()
 conf = Config()
-conf.load_toml()
+conf.load_conf()
 
 is_play = False
 def _callback_out(future: asyncio.Future, say=False):

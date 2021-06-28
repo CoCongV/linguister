@@ -8,7 +8,6 @@ import re
 import time
 from urllib.parse import urlencode
 
-from aiohttp import ClientSession
 from requests import Session
 
 from linguister.const import DEFAULT_USER_AGENT

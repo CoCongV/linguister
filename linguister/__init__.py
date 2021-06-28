@@ -1,10 +1,9 @@
 import asyncio
 from functools import partial
 
-import aiohttp
-from aiohttp.client_exceptions import ClientError
 import click
 import colorama
+import httpx
 
 from linguister import main
 from linguister.audio import play
@@ -33,13 +32,11 @@ async def run(words, say, origin, dest, proxy):
     callback_out = partial(_callback_out, say=say)
     tasks = []
     conf.update({'proxy': proxy})
-    timeout = aiohttp.ClientTimeout(total=10)
-    async with aiohttp.ClientSession(
-            headers={'User-Agent': DEFAULT_USER_AGENT}, timeout=timeout) as session:
+    async with httpx.AsyncClient(headers={'User-Agent': DEFAULT_USER_AGENT}, timeout=10) as client:
         for sdk in conf.SDKS:
             try:
                 future = asyncio.Future()
-                async_obj = getattr(main, sdk)(session, conf, future)
+                async_obj = getattr(main, sdk)(client, conf, future)
             except AttributeError as e:
                 msg = "SDK Load Exception, sdk: {}, detail: {}".format(
                     sdk, str(e))

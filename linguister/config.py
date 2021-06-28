@@ -10,7 +10,7 @@ conf_file = os.path.join(unix_path, 'config.json')
 class Config(UserDict):
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)
-        self.data.update({'SDKS': ['Iciba', 'Youdao'], 'DEBUG': False})
+        self.data.update({'SDKS': ['Youdao'], 'DEBUG': False})
 
     def __getattr__(self, key):
         return super().__getitem__(key)

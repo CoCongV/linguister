@@ -1,6 +1,6 @@
 import asyncio
 
-import aiohttp
+import httpx
 
 from linguister import loop
 from linguister.utils import generate_ph
@@ -14,11 +14,11 @@ class TestSDK:
         loop.run_until_complete(future)
 
     async def youdao(self):
-        async with aiohttp.ClientSession() as session:
+        async with httpx.AsyncClient() as client:
             for words in self.words:
-                youdao_sdk = YouDaoSDK(session)
+                youdao_sdk = YouDaoSDK(client)
                 response = await youdao_sdk.paraphrase(words)
-                result = await response.json()
+                result = response.json()
                 ec_dict = result.get('ec')
                 if ec_dict:
                     ph = generate_ph(
@@ -29,7 +29,6 @@ class TestSDK:
 
                 means = YouDaoSDK.get_means(result)
                 sentences = YouDaoSDK.get_sentences(result)
-                response.release()
                 return {
                     'ph': ph,
                     'means': means,
@@ -39,14 +38,10 @@ class TestSDK:
                     'words': words
                 }
 
-    def test_iciba(self):
-        future = asyncio.ensure_future(self.iciba())
-        loop.run_until_complete(future)
-
     async def iciba(self):
-        async with aiohttp.ClientSession() as session:
+        async with httpx.Client() as client:
             for words in self.words:
-                iciba_sdk = IcibaSDK(session)
+                iciba_sdk = IcibaSDK(client)
                 response = await iciba_sdk.paraphrase(words)
                 result = await response.json()
                 sentences = IcibaSDK.get_sentences(result)

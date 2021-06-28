@@ -13,10 +13,10 @@ class BaseTranslateSDK:
     fr = 'fr' # France
     es = 'es' # Spain
 
-    def __init__(self, session, proxy):
-        self.session = session
-        self.proxy = proxy
-        self._get = partial(self.session.get, proxy=proxy)
+    def __init__(self, client, proxy):
+        self.session = client
+        # self.proxy = proxy
+        self._get = partial(self.session.get)
 
     def generate_random_str(self, length=24) -> str:
         return ''.join(

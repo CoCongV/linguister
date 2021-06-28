@@ -1,3 +1,5 @@
+from httpx import Response
+
 from linguister.exceptions import catch_req
 from linguister.sdk import BaseTranslateSDK
 
@@ -56,7 +58,7 @@ class IcibaSDK(BaseTranslateSDK):
         return response
 
     @catch_req()
-    async def paraphrase(self, word, a="getWordMean", c="search", dict_list=[8]):
+    async def paraphrase(self, word, a="getWordMean", c="search", dict_list=[8]) -> Response:
         params = [('a', a), ('word', word), ('c', c)]
         for i in dict_list:
             params.append(('list', i))

@@ -295,7 +295,7 @@ class GoogleSDK(BaseTranslateSDK):
         super().__init__(session, proxy)
         self.service_urls = service_urls or ['translate.google.com']
         self.token_acquirer = TokenAcquirer(
-            session=self.session, host=self.service_urls[0], proxy=self.proxy)
+            session=self.client, host=self.service_urls[0], proxy=self.proxy)
 
     def _pick_service_url(self):
         if len(self.service_urls) == 1:

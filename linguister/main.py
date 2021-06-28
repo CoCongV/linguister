@@ -18,46 +18,49 @@ class SDKRunner(ABC):
     async def __call__(self, words):
         pass
 
-# class Iciba(SDKRunner):
 
-#     async def __call__(self, words):
-#         iciba_sdk = IcibaSDK(self.client, proxy=self.conf.proxy)
-#         try:
-#             response = await iciba_sdk.paraphrase(words)
-#             result = response.json()
-#             if result.get('errno'):
-#                 raise RequestException(
-#                     "Request Error: errmsg: {}, errcode: {}".format(
-#                         result.get('errmsg'), result.get('errno')))
-#         except (LinguisterException, ClientError) as e:
-#             return {"source": "iciba", "exc": e}
-#         sentences = IcibaSDK.get_sentences(result)
-#         base_info = result["baesInfo"]
+# Deprecation
+class Iciba(SDKRunner):
 
-#         data = {"source": "iciba"}
-#         audio = None
-#         ph = None
-#         if base_info.get("symbols"):
-#             symbols = base_info["symbols"]
-#             ph = generate_ph(US=symbols[0].get("ph_am"), UK=symbols[0].get("ph_en"))
-#             audio = symbols[0].get("ph_am_mp3") or symbols[0].get("ph_en_mp3")
-#             means = IcibaSDK.get_means(symbols)
-#             data["means"] = means
-#         else:
-#             ph = generate_ph()
-#             data.update({
-#                 "translate_msg": base_info["translate_msg"],
-#                 "translate_result": base_info["translate_result"]
-#             })
+    async def __call__(self, words):
+        iciba_sdk = IcibaSDK(self.client, proxy=self.conf.proxy)
+        try:
+            response = await iciba_sdk.paraphrase(words)
+            result = response.json()
+            if result.get('errno'):
+                raise RequestException(
+                    "Request Error: errmsg: {}, errcode: {}".format(
+                        result.get('errmsg'), result.get('errno')))
+        except (LinguisterException, HTTPError) as e:
+            return {"source": "iciba", "exc": e}
+        sentences = IcibaSDK.get_sentences(result)
+        base_info = result["baesInfo"]
 
-#         data.update({
-#             "audio": audio,
-#             "ph": ph,
-#             "sentences": sentences,
-#             "words": words
-#         })
-#         # return data
-#         self.future.set_result(data)
+        data = {"source": "iciba"}
+        audio = None
+        ph = None
+        if base_info.get("symbols"):
+            symbols = base_info["symbols"]
+            ph = generate_ph(US=symbols[0].get("ph_am"), UK=symbols[0].get("ph_en"))
+            audio = symbols[0].get("ph_am_mp3") or symbols[0].get("ph_en_mp3")
+            means = IcibaSDK.get_means(symbols)
+            data["means"] = means
+        else:
+            ph = generate_ph()
+            data.update({
+                "translate_msg": base_info["translate_msg"],
+                "translate_result": base_info["translate_result"]
+            })
+
+        data.update({
+            "audio": audio,
+            "ph": ph,
+            "sentences": sentences,
+            "words": words
+        })
+        # return data
+        self.future.set_result(data)
+
 
 class Youdao(SDKRunner):
     async def __call__(self, words):
@@ -87,6 +90,7 @@ class Youdao(SDKRunner):
             "words": words
         }
         self.future.set_result(data)
+
 
 async def bing(words, session, client_args):
     # TODO:

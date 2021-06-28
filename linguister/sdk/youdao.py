@@ -16,7 +16,7 @@ class YouDaoSDK(BaseTranslateSDK):
                  paraphrase_url="http://dict.youdao.com/jsonapi",
                  translate_url="http://fanyi.youdao.com/translate",
                  proxy=None):
-        super().__init__(session, proxy)
+        super().__init__(session)
         self.suggest_url = suggest_url
         self.paraphrase_url = paraphrase_url
         self.translate_url = translate_url

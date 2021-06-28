@@ -3,6 +3,8 @@ import random
 import string
 import time
 
+from httpx import AsyncClient
+
 from linguister.exceptions import NotSupportLangException
 
 class BaseTranslateSDK:
@@ -13,10 +15,10 @@ class BaseTranslateSDK:
     fr = 'fr' # France
     es = 'es' # Spain
 
-    def __init__(self, client, proxy):
-        self.session = client
-        # self.proxy = proxy
-        self._get = partial(self.session.get)
+    def __init__(self, client: AsyncClient, proxy=None):
+        self.client = client
+        self.proxy = proxy
+        self._get = partial(self.client.get)
 
     def generate_random_str(self, length=24) -> str:
         return ''.join(

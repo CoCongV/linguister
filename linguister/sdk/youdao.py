@@ -1,6 +1,9 @@
+from re import template
+from sys import prefix
 from urllib.parse import urlencode
 
 from linguister.exceptions import catch_req
+from linguister.utils import generate_temp
 from . import BaseTranslateSDK
 
 
@@ -9,17 +12,20 @@ class YouDaoSDK(BaseTranslateSDK):
     app_key: Application key
     app_id : Application ID
     """
+    CAN_PLAY = True
 
     def __init__(self,
-                 session,
+                 client,
                  suggest_url='http://dict.youdao.com/suggest',
                  paraphrase_url="http://dict.youdao.com/jsonapi",
                  translate_url="http://fanyi.youdao.com/translate",
+                 voice_url="http://dict.youdao.com/dictvoice?type={type}&audio={word}",
                  proxy=None):
-        super().__init__(session)
+        super().__init__(client)
         self.suggest_url = suggest_url
         self.paraphrase_url = paraphrase_url
         self.translate_url = translate_url
+        self.voice_url = voice_url
 
     async def interface(self, word, lang='eng', num=5, doctype='json'):
         return await self._get(
@@ -38,10 +44,9 @@ class YouDaoSDK(BaseTranslateSDK):
                          client='mobile',
                          dict_list=[[
                              "ec",
-                             "ce",
                              "simple",
-                             "phrs",
-                         ], "fanyi", "ugc"],
+                             "phrs",                             
+                         ], "fanyi"],
                          network='wifi'):
         dicts_len = len(dict_list)
         dicts_list_cache = []
@@ -60,7 +65,7 @@ class YouDaoSDK(BaseTranslateSDK):
                 'network': network
             })
         return await self._get(
-            self.paraphrase_url + '?' + params)
+            self.paraphrase_url, params=params)
 
     @staticmethod
     def get_means(dict_):
@@ -81,3 +86,19 @@ class YouDaoSDK(BaseTranslateSDK):
                 tr = phr['trs'][0]['tr']['l']['i']
                 result.append({'example': headword, 'translate': tr})
         return result
+
+    
+    async def _download_autio(self, word, type=0): 
+        # http://www.cxyzjd.com/article/q6q6q/109342595
+        # 0 is US voice
+        # 1 is UK voice
+        return await self._get(self.voice_url.format(type=type, word=word))
+
+    async def generate_voice(self, word):
+        us_response = await self._download_autio(word, 0)
+        us_filename = generate_temp(us_response.content, prefix="youdao_us")
+
+        uk_response = await self._download_autio(word, 1)
+        uk_filename = generate_temp(uk_response.content, prefix="youdao_uk")
+        
+        return {"us": us_filename, "uk": uk_filename}

@@ -19,17 +19,18 @@ loop = asyncio.get_event_loop()
 conf = Config()
 conf.load_conf()
 
+
 is_play = False
-def _callback_out(future: asyncio.Future, say=False):
+def _callback_play(future: asyncio.Future, say=False):
     global is_play
     result = future.result()
     out(result)
     if say and not is_play and result.get('audio'):
-        play(result['audio'])
+        play(result['audio']["us"])
         is_play = True
 
 async def run(words, say, origin, dest, proxy):
-    callback_out = partial(_callback_out, say=say)
+    callback_out = partial(_callback_play, say=say)
     tasks = []
     conf.update({'proxy': proxy})
     async with httpx.AsyncClient(headers={'User-Agent': DEFAULT_USER_AGENT}, timeout=10) as client:

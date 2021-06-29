@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any, Callable, TypedDict
 
 from httpx._exceptions import HTTPError
 
@@ -6,6 +7,14 @@ from linguister.exceptions import LinguisterException, RequestException
 from linguister.sdk import IcibaSDK, YouDaoSDK, BingSDK, GoogleSDK
 from linguister.utils import generate_ph
 
+
+class Result(TypedDict):
+    ph: Any
+    means: Any
+    sentences: Any
+    source: str
+    audio: dict[str, str]
+    word: str
 
 class SDKRunner(ABC):
 
@@ -63,11 +72,11 @@ class Iciba(SDKRunner):
 
 
 class Youdao(SDKRunner):
-    async def __call__(self, words):
+    async def __call__(self, word) -> Result:
         youdao_sdk = YouDaoSDK(self.client)
 
         try:
-            response = await youdao_sdk.paraphrase(words)
+            response = await youdao_sdk.paraphrase(word)
         except (LinguisterException, HTTPError) as e:
             return {"source": "youdao", "exc": e}
 
@@ -81,13 +90,15 @@ class Youdao(SDKRunner):
 
         means = YouDaoSDK.get_means(result)
         sentences = YouDaoSDK.get_sentences(result)
+        voice = await youdao_sdk.generate_voice(word)
+        
         data = {
             "ph": ph,
             "means": means,
             "sentences": sentences,
             "source": "youdao",
-            "audio": None,
-            "words": words
+            "audio": voice,
+            "words": word
         }
         self.future.set_result(data)
 

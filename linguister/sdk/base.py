@@ -1,6 +1,7 @@
 from functools import partial
 import random
 import string
+import tempfile
 import time
 
 from httpx import AsyncClient
@@ -14,6 +15,8 @@ class BaseTranslateSDK:
     de = 'de' # German
     fr = 'fr' # France
     es = 'es' # Spain
+
+    CAN_PLAY = False
 
     def __init__(self, client: AsyncClient, proxy=None):
         self.client = client

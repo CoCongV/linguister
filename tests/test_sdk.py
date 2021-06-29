@@ -4,7 +4,7 @@ import httpx
 
 from linguister import loop
 from linguister.utils import generate_ph
-from linguister.sdk import YouDaoSDK, IcibaSDK
+from linguister.sdk import YouDaoSDK
 
 
 class TestSDK:
@@ -14,6 +14,7 @@ class TestSDK:
         loop.run_until_complete(future)
 
     async def youdao(self):
+        results = []
         async with httpx.AsyncClient() as client:
             for words in self.words:
                 youdao_sdk = YouDaoSDK(client)
@@ -29,11 +30,14 @@ class TestSDK:
 
                 means = YouDaoSDK.get_means(result)
                 sentences = YouDaoSDK.get_sentences(result)
-                return {
+                results.append(
+                {
                     'ph': ph,
                     'means': means,
                     'sentences': sentences,
                     'source': 'youdao',
                     'audio': None,
                     'words': words
-                }
+                })
+        return results
+                

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from asyncio import Queue
 from typing import Any, Callable, TypedDict
 
 from httpx._exceptions import HTTPError
@@ -18,20 +19,24 @@ class Result(TypedDict):
 
 class SDKRunner(ABC):
 
-    def __init__(self, client, conf, future):
+    def __init__(self, client, conf, future, wq: Queue):
         self.client = client
         self.conf = conf
         self.future = future
+        self.wqueue = wq
+    
+    async def __call__(self, word):
+        data = await self.run(word)
+        await self.wqueue.put(data)
     
     @abstractmethod
-    async def __call__(self, words):
+    async def run(self, words):
         pass
-
 
 # Deprecation
 class Iciba(SDKRunner):
 
-    async def __call__(self, words):
+    async def run(self, words) -> Result:
         iciba_sdk = IcibaSDK(self.client, proxy=self.conf.proxy)
         try:
             response = await iciba_sdk.paraphrase(words)
@@ -67,12 +72,11 @@ class Iciba(SDKRunner):
             "sentences": sentences,
             "words": words
         })
-        # return data
-        self.future.set_result(data)
+        return data
 
 
 class Youdao(SDKRunner):
-    async def __call__(self, word) -> Result:
+    async def run(self, word):
         youdao_sdk = YouDaoSDK(self.client)
 
         try:
@@ -92,7 +96,7 @@ class Youdao(SDKRunner):
         sentences = YouDaoSDK.get_sentences(result)
         voice = await youdao_sdk.generate_voice(word)
         
-        data = {
+        return {
             "ph": ph,
             "means": means,
             "sentences": sentences,
@@ -100,7 +104,6 @@ class Youdao(SDKRunner):
             "audio": voice,
             "words": word
         }
-        self.future.set_result(data)
 
 
 async def bing(words, session, client_args):

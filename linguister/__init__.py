@@ -1,4 +1,5 @@
 import asyncio
+from asyncio import queues
 from functools import partial
 
 import click
@@ -16,28 +17,27 @@ from linguister.__version__ import __version__
 
 colorama.init(autoreset=True)
 loop = asyncio.get_event_loop()
+wqueue = asyncio.Queue(loop=loop)
 conf = Config()
 conf.load_conf()
 
 
 is_play = False
-def _callback_play(future: asyncio.Future, say=False):
+def output(result, say=False):
     global is_play
-    result = future.result()
     out(result)
     if say and not is_play and result.get('audio'):
         play(result['audio']["us"])
         is_play = True
 
 async def run(words, say, origin, dest, proxy):
-    callback_out = partial(_callback_play, say=say)
     tasks = []
     conf.update({'proxy': proxy})
     async with httpx.AsyncClient(headers={'User-Agent': DEFAULT_USER_AGENT}, timeout=10) as client:
         for sdk in conf.SDKS:
             try:
                 future = asyncio.Future()
-                async_obj = getattr(main, sdk)(client, conf, future)
+                async_obj: main.SDKRunner = getattr(main, sdk)(client, conf, future, wqueue)
             except AttributeError as e:
                 msg = "SDK Load Exception, sdk: {}, detail: {}".format(
                     sdk, str(e))
@@ -47,11 +47,13 @@ async def run(words, say, origin, dest, proxy):
                 else:
                     continue
             else:
-                future.add_done_callback(callback_out)
-                task = asyncio.ensure_future(async_obj(words))
-                tasks.append(task)
+                asyncio.ensure_future(async_obj(words))
 
-        await asyncio.gather(*tasks)
+        i = 0
+        while i < len(conf.SDKS):
+            i += 1
+            output(await wqueue.get(), say)
+
     change_line()
 
 @click.group()

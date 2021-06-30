@@ -3,7 +3,19 @@ import random
 import string
 import time
 
+from httpx import AsyncClient
+
 from linguister.exceptions import NotSupportLangException
+
+
+from typing import TypedDict
+
+
+class SentenceDict(TypedDict):
+    example: str
+    translate: str
+
+SentencesResults = list[SentenceDict]
 
 class BaseTranslateSDK:
     zh = 'zh' # China
@@ -13,10 +25,12 @@ class BaseTranslateSDK:
     fr = 'fr' # France
     es = 'es' # Spain
 
-    def __init__(self, session, proxy):
-        self.session = session
+    CAN_PLAY = False
+
+    def __init__(self, client: AsyncClient, proxy=None):
+        self.client = client
         self.proxy = proxy
-        self._get = partial(self.session.get, proxy=proxy)
+        self._get = partial(self.client.get)
 
     def generate_random_str(self, length=24) -> str:
         return ''.join(

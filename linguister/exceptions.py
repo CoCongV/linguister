@@ -1,14 +1,12 @@
 from functools import wraps
 
-from aiohttp.client_exceptions import ClientConnectionError
-
 def catch_req():
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             response = await func(*args, **kwargs)
-            if response.status != 200:
-                raise RequestException("Request Error: {}".format(response.status))
+            if response.status_code != 200:
+                raise RequestException("Request Error: {}".format(response.status_code))
             else:
                 return response
 

@@ -1,36 +1,64 @@
 from abc import ABC, abstractmethod
+from asyncio import Queue, Future
+from typing import Any, Callable, TypedDict, Union
 
-from aiohttp.client_exceptions import ClientError
+from httpx import AsyncClient
+from httpx._exceptions import HTTPError
 
 from linguister.exceptions import LinguisterException, RequestException
 from linguister.sdk import IcibaSDK, YouDaoSDK, BingSDK, GoogleSDK
 from linguister.utils import generate_ph
 
 
+class Some(TypedDict):
+    ph: any
+    means: any
+    sentences: any
+    source: str
+    audio: Union[dict[str, str], None]
+    word: str
+
+
+class Err(TypedDict):
+    source: str
+    exc: Exception
+
+
+class Result(TypedDict):
+    some: Union[Some, None]
+    err: Union[Err, None]
+
+
 class SDKRunner(ABC):
 
-    def __init__(self, session, conf, future):
-        self.session = session
+    def __init__(self, client: AsyncClient, conf, future: Future, wq: Queue):
+        self.client = client
         self.conf = conf
         self.future = future
+        self.wqueue = wq
+    
+    async def __call__(self, word):
+        await self.wqueue.put(await self.run(word))
     
     @abstractmethod
-    async def __call__(self, words):
+    async def run(self, word):
         pass
 
+# Deprecation
 class Iciba(SDKRunner):
 
-    async def __call__(self, words):
-        iciba_sdk = IcibaSDK(self.session, proxy=self.conf.proxy)
+    async def run(self, words) -> Result:
+        iciba_sdk = IcibaSDK(self.client, proxy=self.conf.proxy)
         try:
             response = await iciba_sdk.paraphrase(words)
-            result = await response.json()
+            result = response.json()
             if result.get('errno'):
                 raise RequestException(
                     "Request Error: errmsg: {}, errcode: {}".format(
                         result.get('errmsg'), result.get('errno')))
-        except (LinguisterException, ClientError) as e:
-            return {"source": "iciba", "exc": e}
+        except (LinguisterException, HTTPError) as e:
+            err = {"source": "iciba", "exc": e}
+            return {"some": None, "err": err}
         sentences = IcibaSDK.get_sentences(result)
         base_info = result["baesInfo"]
 
@@ -50,26 +78,26 @@ class Iciba(SDKRunner):
                 "translate_result": base_info["translate_result"]
             })
 
-        response.release()
         data.update({
             "audio": audio,
             "ph": ph,
             "sentences": sentences,
             "words": words
         })
-        # return data
-        self.future.set_result(data)
+        return {"some": data, "err": None}
+
 
 class Youdao(SDKRunner):
-    async def __call__(self, words):
-        youdao_sdk = YouDaoSDK(self.session)
+    async def run(self, word):
+        youdao_sdk = YouDaoSDK(self.client)
 
         try:
-            response = await youdao_sdk.paraphrase(words)
-        except (LinguisterException, ClientError) as e:
-            return {"source": "youdao", "exc": e}
+            response = await youdao_sdk.paraphrase(word)
+        except (LinguisterException, HTTPError) as e:
+            err = {"source": "youdao", "exc": e}
+            return {"some": None, "err": err}
 
-        result = await response.json()
+        result = response.json()
         ec_dict = result.get("ec")
         if ec_dict:
             ph = generate_ph(US=ec_dict["word"][0].get("usphone"),
@@ -79,24 +107,25 @@ class Youdao(SDKRunner):
 
         means = YouDaoSDK.get_means(result)
         sentences = YouDaoSDK.get_sentences(result)
-        response.release()
+        voice = await youdao_sdk.generate_voice(word)
+        
         data = {
             "ph": ph,
             "means": means,
             "sentences": sentences,
             "source": "youdao",
-            "audio": None,
-            "words": words
+            "audio": voice,
+            "words": word
         }
-        self.future.set_result(data)
+        return {"some": data, "err": None}
 
-async def bing(words, session, aiohttp_args):
+async def bing(words, session, client_args):
     # TODO:
     bing_sdk = BingSDK(session)
 
     try:
         response = await bing_sdk.paraphrase(words)
-    except (LinguisterException, ClientError) as e:
+    except (LinguisterException, HTTPError) as e:
         return {"source": "bing", "exc": e}
 
     # result = await response.json()
@@ -106,7 +135,7 @@ async def bing(words, session, aiohttp_args):
 class Google(SDKRunner):
 
     async def __call__(self, words):
-        google_sdk = GoogleSDK(self.session, proxy=self.conf.proxy)
+        google_sdk = GoogleSDK(self.client, proxy=self.conf.proxy)
         result = await google_sdk.translate(words)
         ph = generate_ph(
             Origin=result['pronunciation'],

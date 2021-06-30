@@ -1,15 +1,10 @@
 import asyncio
+from asyncio import queues
 from functools import partial
 
-import aiohttp
-from aiohttp.client_exceptions import ClientError
-try:
-    import uvloop
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-except ImportError:
-    pass
 import click
 import colorama
+import httpx
 
 from linguister import main
 from linguister.audio import play
@@ -17,34 +12,36 @@ from linguister.config import Config
 from linguister.const import DEFAULT_USER_AGENT
 from linguister.errout import err
 from linguister.exceptions import ConfigException
-from linguister.info import change_line, out
+from linguister.info import change_line, err_out, out
 from linguister.__version__ import __version__
 
 colorama.init(autoreset=True)
 loop = asyncio.get_event_loop()
+wqueue = asyncio.Queue()
 conf = Config()
-conf.load_toml()
+conf.load_conf()
+
 
 is_play = False
-def _callback_out(future: asyncio.Future, say=False):
+def output(result, say=False):
     global is_play
-    result = future.result()
-    out(result)
-    if say and not is_play and result.get('audio'):
-        play(result['audio'])
+    if result.get("err"):
+        err_out(result["err"])
+        return
+    else:
+        out(result["some"])
+    some = result["some"]
+    if say and not is_play and some.get('audio'):
+        play(some['audio']["us"])
         is_play = True
 
 async def run(words, say, origin, dest, proxy):
-    callback_out = partial(_callback_out, say=say)
-    tasks = []
     conf.update({'proxy': proxy})
-    timeout = aiohttp.ClientTimeout(total=10)
-    async with aiohttp.ClientSession(
-            headers={'User-Agent': DEFAULT_USER_AGENT}, timeout=timeout) as session:
+    async with httpx.AsyncClient(headers={'User-Agent': DEFAULT_USER_AGENT}, timeout=10) as client:
         for sdk in conf.SDKS:
             try:
                 future = asyncio.Future()
-                async_obj = getattr(main, sdk)(session, conf, future)
+                async_obj: main.SDKRunner = getattr(main, sdk)(client, conf, future, wqueue)
             except AttributeError as e:
                 msg = "SDK Load Exception, sdk: {}, detail: {}".format(
                     sdk, str(e))
@@ -54,11 +51,13 @@ async def run(words, say, origin, dest, proxy):
                 else:
                     continue
             else:
-                future.add_done_callback(callback_out)
-                task = asyncio.ensure_future(async_obj(words))
-                tasks.append(task)
+                asyncio.ensure_future(async_obj(words))
 
-        await asyncio.gather(*tasks)
+        i = 0
+        while i < len(conf.SDKS):
+            i += 1
+            output(await wqueue.get(), say)
+
     change_line()
 
 @click.group()

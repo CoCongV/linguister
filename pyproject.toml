@@ -5,7 +5,13 @@ description = ""
 authors = [
     {name = "CongCo", email = "cong.lv.yx@gmail.com"},
 ]
-dependencies = ["click", "aiohttp", "colorama", "playsound", "aiodns", "cchardet", "toml"]
+dependencies = [
+    "click",
+    "colorama",
+    "playsound",
+    "httpx==0.13.3",
+    "googletrans==4.0.0rc1",
+]
 requires-python = ">=3.9"
 dynamic = ["classifiers"]
 license = {text = "MIT"}

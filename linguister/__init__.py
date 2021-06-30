@@ -12,12 +12,12 @@ from linguister.config import Config
 from linguister.const import DEFAULT_USER_AGENT
 from linguister.errout import err
 from linguister.exceptions import ConfigException
-from linguister.info import change_line, out
+from linguister.info import change_line, err_out, out
 from linguister.__version__ import __version__
 
 colorama.init(autoreset=True)
 loop = asyncio.get_event_loop()
-wqueue = asyncio.Queue(loop=loop)
+wqueue = asyncio.Queue()
 conf = Config()
 conf.load_conf()
 
@@ -25,13 +25,17 @@ conf.load_conf()
 is_play = False
 def output(result, say=False):
     global is_play
-    out(result)
-    if say and not is_play and result.get('audio'):
-        play(result['audio']["us"])
+    if result.get("err"):
+        err_out(result["err"])
+        return
+    else:
+        out(result["some"])
+    some = result["some"]
+    if say and not is_play and some.get('audio'):
+        play(some['audio']["us"])
         is_play = True
 
 async def run(words, say, origin, dest, proxy):
-    tasks = []
     conf.update({'proxy': proxy})
     async with httpx.AsyncClient(headers={'User-Agent': DEFAULT_USER_AGENT}, timeout=10) as client:
         for sdk in conf.SDKS:

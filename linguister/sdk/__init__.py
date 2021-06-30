@@ -2,7 +2,7 @@ import random
 import string
 import time
 
-from .base import BaseTranslateSDK
+from .base import BaseTranslateSDK, SentencesResults
 from .bing import BingSDK
 from .google import GoogleSDK
 from .iciba import IcibaSDK

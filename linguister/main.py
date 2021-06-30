@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from asyncio import Queue
-from typing import Any, Callable, TypedDict
+from asyncio import Queue, Future
+from typing import Any, Callable, TypedDict, Union
 
+from httpx import AsyncClient
 from httpx._exceptions import HTTPError
 
 from linguister.exceptions import LinguisterException, RequestException
@@ -9,28 +10,38 @@ from linguister.sdk import IcibaSDK, YouDaoSDK, BingSDK, GoogleSDK
 from linguister.utils import generate_ph
 
 
-class Result(TypedDict):
-    ph: Any
-    means: Any
-    sentences: Any
+class Some(TypedDict):
+    ph: any
+    means: any
+    sentences: any
     source: str
-    audio: dict[str, str]
+    audio: Union[dict[str, str], None]
     word: str
+
+
+class Err(TypedDict):
+    source: str
+    exc: Exception
+
+
+class Result(TypedDict):
+    some: Union[Some, None]
+    err: Union[Err, None]
+
 
 class SDKRunner(ABC):
 
-    def __init__(self, client, conf, future, wq: Queue):
+    def __init__(self, client: AsyncClient, conf, future: Future, wq: Queue):
         self.client = client
         self.conf = conf
         self.future = future
         self.wqueue = wq
     
     async def __call__(self, word):
-        data = await self.run(word)
-        await self.wqueue.put(data)
+        await self.wqueue.put(await self.run(word))
     
     @abstractmethod
-    async def run(self, words):
+    async def run(self, word):
         pass
 
 # Deprecation
@@ -46,7 +57,8 @@ class Iciba(SDKRunner):
                     "Request Error: errmsg: {}, errcode: {}".format(
                         result.get('errmsg'), result.get('errno')))
         except (LinguisterException, HTTPError) as e:
-            return {"source": "iciba", "exc": e}
+            err = {"source": "iciba", "exc": e}
+            return {"some": None, "err": err}
         sentences = IcibaSDK.get_sentences(result)
         base_info = result["baesInfo"]
 
@@ -72,7 +84,7 @@ class Iciba(SDKRunner):
             "sentences": sentences,
             "words": words
         })
-        return data
+        return {"some": data, "err": None}
 
 
 class Youdao(SDKRunner):
@@ -82,7 +94,8 @@ class Youdao(SDKRunner):
         try:
             response = await youdao_sdk.paraphrase(word)
         except (LinguisterException, HTTPError) as e:
-            return {"source": "youdao", "exc": e}
+            err = {"source": "youdao", "exc": e}
+            return {"some": None, "err": err}
 
         result = response.json()
         ec_dict = result.get("ec")
@@ -96,7 +109,7 @@ class Youdao(SDKRunner):
         sentences = YouDaoSDK.get_sentences(result)
         voice = await youdao_sdk.generate_voice(word)
         
-        return {
+        data = {
             "ph": ph,
             "means": means,
             "sentences": sentences,
@@ -104,7 +117,7 @@ class Youdao(SDKRunner):
             "audio": voice,
             "words": word
         }
-
+        return {"some": data, "err": None}
 
 async def bing(words, session, client_args):
     # TODO:

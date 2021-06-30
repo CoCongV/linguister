@@ -7,11 +7,6 @@ from linguister.errout import err
 print = partial(print, end='')
 
 def out(data):
-    if data.get('exc'):
-        indent(2)
-        err(str(data['exc']) + ' ~ ' + data['source'])
-        separator()
-        return
     info_out(data['words'], data['ph'], data['source'])
     for mean in data.get('means', []):
         mean_out(mean)
@@ -20,6 +15,13 @@ def out(data):
     for n, s in enumerate(data['sentences'], start=1):
         sentence_out(n, s['example'], s['translate'])
     separator()
+
+def err_out(err_data):
+    if err_data.get('exc'):
+        indent(2)
+        err(str(err_data['exc']) + ' ~ ' + err_data['source'])
+        separator()
+        return
 
 def info_out(word, ph, source):
     indent(2)

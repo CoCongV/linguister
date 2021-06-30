@@ -15,8 +15,8 @@ with open(os.path.join(here, "linguister", "__version__.py")) as f:
     exec(f.read(), about)
 
 requires = [
-    'aiohttp', 'click', 'requests', 'colorama', 'playsound', 'pygobject',
-    'pycairo', 'toml'
+    'click', 'colorama', 'playsound', 'pygobject',
+    'pycairo'
 ]
 
 setup(
@@ -46,9 +46,7 @@ setup(
     classifiers=[
         'Programming Language :: Python',
         'Operating System :: Unix',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.9',
     ],
     test_suite='nose.collector',
     setup_requires=[

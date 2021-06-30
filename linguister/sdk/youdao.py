@@ -4,7 +4,7 @@ from urllib.parse import urlencode
 
 from linguister.exceptions import catch_req
 from linguister.utils import generate_temp
-from . import BaseTranslateSDK
+from . import BaseTranslateSDK, SentencesResults
 
 
 class YouDaoSDK(BaseTranslateSDK):
@@ -77,7 +77,7 @@ class YouDaoSDK(BaseTranslateSDK):
         return result
 
     @staticmethod
-    def get_sentences(dict_):
+    def get_sentences(dict_) -> SentencesResults:
         result = []
         if dict_.get('phrs'):
             for i in dict_['phrs']['phrs'][:3]:

@@ -1,12 +1,21 @@
 from functools import partial
 import random
 import string
-import tempfile
 import time
 
 from httpx import AsyncClient
 
 from linguister.exceptions import NotSupportLangException
+
+
+from typing import TypedDict
+
+
+class SentenceDict(TypedDict):
+    example: str
+    translate: str
+
+SentencesResults = list[SentenceDict]
 
 class BaseTranslateSDK:
     zh = 'zh' # China
